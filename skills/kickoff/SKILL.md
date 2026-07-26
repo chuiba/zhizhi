@@ -75,9 +75,11 @@ Every kickoff that ran at least one technique lands on an artifact — the nothi
 exit needs none; "just implement" *is* its handoff:
 
 - **An unknowns-first plan** (read `references/plan.md`) if the user is heading into
-  implementation. The plan embeds a deviation policy and instructs the implementer to
-  keep implementation notes (read `references/impl-notes.md` and fold its setup into the
-  plan's handoff section).
+  implementation. The plan embeds a deviation policy, ends in a verification contract
+  whose pass bars the user approves in the same single review pass — locked before any
+  implementation exists, executed by wrapup's audit after — and instructs the
+  implementer to keep implementation notes (read `references/impl-notes.md` and fold
+  its setup into the plan's handoff section).
 - **A rewritten prompt** if the user just wanted clarity — their original request with
   resolved assumptions inlined and remaining open questions flagged, ready to paste into
   a fresh session.

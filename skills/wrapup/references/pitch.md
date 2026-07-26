@@ -38,6 +38,8 @@ same structure, demo media embedded.
 ## Quality bar
 
 - A reviewer who reads only the demo and section 3 should already lean yes.
-- Every "it works" claim is backed by something visible: a test name, a screenshot, a
-  command output.
+- Every "it works" claim is backed by something visible: a test **run**, a screenshot,
+  a command output — a test's name is a claim, its output is evidence. When the wrapup
+  audit ran, cite the evidence behind its verdict rows, and let section 7 link the
+  audit's verdict table instead of restating it.
 - No section over ~150 words except the decisions section. Cut until it hurts, then stop.

@@ -1,6 +1,6 @@
 ---
 name: quiz-me
-description: Quiz-me (考考我) — after a large change, or any change the user didn't author themselves (AI-written code), generates a report explaining the context, intuition, and mechanics of what changed — then quizzes the user on it and grades the answers. Recommends merging only when the user passes completely. Use when the user says "quiz me", "考考我", "测测我", "我不放心这次改动", "do I actually understand this change", "explain what happened then test me", or after a long working session before merge.
+description: Quiz-me (考考我) — after a large change, or any change the user didn't author themselves (AI-written code), generates a report explaining the context, intuition, and mechanics of what changed — then quizzes the user on it and grades the answers strictly, ending in an explicit understanding verdict (PASS / NOT YET). Understanding is one axis only — merge-worthiness belongs to wrapup's verification audit. Use when the user says "quiz me", "考考我", "测测我", "我不放心这次改动", "do I actually understand this change", "explain what happened then test me", or after a long working session before merge.
 ---
 
 # Quiz Me
@@ -8,7 +8,9 @@ description: Quiz-me (考考我) — after a large change, or any change the use
 After a long session, more happened than the user realizes. Reading diffs gives only a
 light understanding, because much of the new behavior depends on **existing code paths
 the diff never shows**. This skill closes that gap: explain, then verify the explanation
-landed. The user merges only after passing.
+landed. It measures one axis only — whether the user understands the change. Whether
+the change *works* is wrapup's verification audit's question; a user who shouldn't
+merge what they can't stand behind also shouldn't merge what nobody verified.
 
 **Language:** write the report, quiz questions, and verdicts in the language the user is
 speaking. The verdict keywords PASS / NOT YET stay in English in every language — they
@@ -43,6 +45,15 @@ but never thin out "What it stands on" or "Where it could break"; they are the p
 Default to Markdown. If the user asks for HTML (or the change is big enough that
 navigation helps), produce a single self-contained HTML file with the quiz at the bottom.
 
+**The report is the answer key, and the key is a map.** Every claim in it must be
+territory-backed — a file/line you actually opened, or output you actually executed
+(tracing and failure-mode answers especially: walk the real code path or run the input
+before asserting what happens). A claim you can only assert goes into "Where it could
+break", and no quiz question may hang on it — a strictly graded quiz keyed to a wrong
+map teaches the error harder. Quiz-me runs without wrapup's audit, so this rule is the
+whole correctness safeguard here: if backing a claim would require running something
+you can't, say so in the report rather than asserting.
+
 Write the report to a file, not only into chat — grading spans multiple turns, and the
 report is the answer key; it must survive context compaction. Put it in the project's
 working-docs home or a gitignored directory in the repo — not a session temp dir
@@ -67,6 +78,11 @@ Format for low friction — a quiz nobody takes verifies nothing:
   holds the misconception must find its distractor attractive.
 - **At most one short-answer question per three questions** (the tracing question is
   usually the one), answerable in a handful of keywords or arrows — say so explicitly.
+- **At most one or two prediction items**, where a check is cheap to run: the user
+  states what the system will do for a concrete input, then it is actually run and
+  checked (on a host that can't execute, hand the user the command). Prediction beats
+  recall — but only in small doses; the low-friction format is what makes the quiz get
+  taken at all.
 - Number questions and letter the options so the whole quiz can be answered in one
   line ("1B 2A 3C"). If the host provides a structured choice UI, use it.
 - No trivia — every question's answer should matter for operating or reviewing this
@@ -76,16 +92,23 @@ Format for low friction — a quiz nobody takes verifies nothing:
 
 - Grade each answer; partial credit is a fail for that question. For short answers,
   judge the concept, not the prose — terse keyword answers are fine.
-- For each miss: re-explain with a file/line reference, then ask a **variant** of the
-  question (not the same one — the user can echo, that's not understanding).
+- Attribution runs in two rounds: a **first miss is presumed a clarity defect in the
+  explanation** — re-explain with a file/line reference, no penalty — then ask a
+  **variant** of the question (not the same one — the user can echo, that's not
+  understanding). A miss on the variant is an understanding gap and counts toward NOT
+  YET. The burden of legibility starts on the explainer; it transfers to the reader
+  only after a better explanation failed.
 - Repeat until everything passes — or the user stops. Stopping early is always allowed
   and always a NOT YET, never a reluctant PASS.
 
 End with an explicit verdict:
 
-- **PASS — you understand this change; safe to merge from an understanding standpoint.**
+- **PASS — you understand this change.** Understanding is one axis; merge-worthiness
+  is the other, and it belongs to wrapup's verification audit. If merging is the
+  question, say so in the same breath: run wrapup.
 - **NOT YET — misses on: <topics>. Re-quiz when ready.**
 
 Never soften the verdict. The whole value of the skill is that the user can trust a
-PASS. Everything after the dash is written in the user's language; the PASS / NOT YET
-keywords stay English.
+PASS — and a PASS that promised less than "safe to merge" is one the user can trust
+further. Everything after the dash is written in the user's language; the PASS / NOT
+YET keywords stay English.

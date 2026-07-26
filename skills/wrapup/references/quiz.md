@@ -31,6 +31,13 @@ but never thin out "What it stands on" or "Where it could break"; they are the p
 Default Markdown; a single self-contained HTML file if the change is big enough that
 navigation helps.
 
+**The report is the answer key, and the key is a map.** Every claim in it must be
+territory-backed — a file/line you actually opened, or output you actually executed
+(tracing and failure-mode answers especially: walk the real code path or run the input
+before asserting what happens). When the wrapup audit ran, cite its verdict rows. A
+claim you can only assert goes into "Where it could break", and no quiz question may
+hang on it — a strictly graded quiz keyed to a wrong map teaches the error harder.
+
 Write the report to a file, not only into chat — grading spans multiple turns, and the
 report is the answer key; it must survive context compaction. Put it in the project's
 working-docs home or a gitignored directory in the repo — not a session temp dir
@@ -53,13 +60,21 @@ Format for low friction — a quiz nobody takes verifies nothing:
   plausible misconceptions, not filler.
 - **At most one short-answer question per three questions**, answerable in keywords or
   arrows — say so explicitly.
+- **At most one or two prediction items**, where a check is cheap to run: the user
+  states what the system will do for a concrete input, then it is actually run and
+  checked (on a host that can't execute, hand the user the command). Prediction beats
+  recall — but only in small doses; the low-friction format is what makes the quiz get
+  taken at all.
 - Number questions and letter options so the whole quiz can be answered in one line
   ("1B 2A 3C"). If the host provides a structured choice UI, use it.
 - No trivia — every answer should matter for operating or reviewing this code.
 
 ## 4. Grade strictly
 
-Partial credit is a fail for that question. For each miss: re-explain with a file/line
-reference, then ask a **variant** (not the same question — echoing isn't understanding).
-Repeat until everything passes — or the user stops. Stopping early is always allowed
-and always a NOT YET, never a reluctant PASS.
+Partial credit is a fail for that question. Attribution runs in two rounds: a **first
+miss is presumed a clarity defect in the explanation** — re-explain with a file/line
+reference, no penalty — then ask a **variant** (not the same question — echoing isn't
+understanding). A miss on the variant is an understanding gap and counts toward NOT
+YET. The burden of legibility starts on the explainer; it transfers to the reader only
+after a better explanation failed. Repeat until everything passes — or the user stops.
+Stopping early is always allowed and always a NOT YET, never a reluctant PASS.

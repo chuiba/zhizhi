@@ -57,7 +57,9 @@ already feel**:
 Diagnoses your unknowns, then runs **only** the techniques that fire — a blind spot
 briefing for unfamiliar territory, throwaway prototypes when you'll *know it when you
 see it*, a one-question-at-a-time interview for open decisions, semantics extraction
-from a reference — landing on a plan you can review in five minutes.
+from a reference — landing on a plan you can review in five minutes, whose verification
+contract (checks, pass bars committed up front, who runs each) locks before
+implementation starts.
 
 ```text
 You:    /kickoff add SSO — I've never touched this app's auth module
@@ -77,24 +79,28 @@ the way. Kickoff is a diagnosis, not a ceremony.
 
 ### 📦 `wrapup` — "I just finished"
 
-Packages the work into a buy-in doc that leads with the demo and answers reviewers'
-objections up front. Then quizzes you on what actually changed — including the existing
-code paths diffs never show — and only recommends merging on a full pass. Finally,
+Audits the change first — re-running the plan's verification contract and reconciling
+the diff against the logged deviations, so undocumented deviations are detected, not
+confessed. Then packages the work into a buy-in doc that leads with the demo, hands you
+the steps to run it yourself plus the two or three spots most worth a deep look, and
+quizzes you on what actually changed — including the existing code paths diffs never
+show. Merge is recommended only when the contract is green **and** you pass. Finally,
 banks the session's surprises into permanent context.
 
 ### 🎯 `quiz-me` — "I'm not sure I understand this change"
 
 The quiz alone: explain, test, grade strictly. Ends with an explicit
-**PASS — safe to merge** or **NOT YET — misses on: <topics>**. Never softened, so you
-can trust a PASS.
+**PASS — you understand this change** or **NOT YET — misses on: <topics>**. Never
+softened, so you can trust a PASS — which speaks to understanding only; whether the
+change *works* is wrapup's audit's question.
 
 ## The loop
 
 ```mermaid
 flowchart LR
-    K["🔍 kickoff"] --> P["unknowns-first plan"]
+    K["🔍 kickoff"] --> P["unknowns-first plan<br/><i>+ verification contract</i>"]
     P --> I["implement<br/><i>fresh session, deviations logged</i>"]
-    I --> W["📦 wrapup"]
+    I --> W["📦 wrapup<br/><i>audit → package → quiz</i>"]
     W -. "learnings promoted to<br/>CLAUDE.md / AGENTS.md" .-> K
 ```
 
@@ -104,12 +110,15 @@ What you learn becomes the map for next time.
 
 The eight techniques from Thariq's
 [*A Field Guide to Fable: Finding Your Unknowns*](https://x.com/trq212/article/2073100352921215386)
-are all here — plus a ninth the framework logically demands: the **premise challenge**.
-The unknowns matrix assumes your "knowns" are true, but the most expensive failures come
-from false confidence, so kickoff also falsifies what you treat as fact.
+are all here — plus two the framework logically demands. The **premise challenge**: the
+unknowns matrix assumes your "knowns" are true, but the most expensive failures come
+from false confidence, so kickoff falsifies what you treat as fact. And its mirror, the
+**verification audit**: after implementation the same false-confidence risk sits with
+the implementer, so wrapup falsifies what the implementation claims — against the diff
+and the running system, never against its own story.
 
-All nine live as the agent's internal toolbox (`references/` in each skill), loaded only
-when needed. You never have to name them:
+All of them live as the agent's internal toolbox (`references/` in each skill), loaded
+only when needed. You never have to name them:
 
 | You say… | Kickoff reaches for |
 |---|---|
@@ -135,14 +144,16 @@ when needed. You never have to name them:
 | Reference extraction | before | Reads a reference's actual source, produces a keep/adapt/drop semantics checklist before any code is written | [use-reference.md](./skills/kickoff/references/use-reference.md) |
 | Unknowns-first plan | before | Most-likely-to-change decisions on top (with confidence + what would flip them); mechanical work buried at the bottom | [plan.md](./skills/kickoff/references/plan.md) |
 | Implementation notes | during | Logs decisions, deviations, and surprises as they happen; conservative option + keep going — and when deviations pile up, triggers a re-diagnosis instead of patching a broken plan | [impl-notes.md](./skills/kickoff/references/impl-notes.md) |
+| Verification audit | after | Re-runs the plan's contract, reconstructs the real deviation set from the diff, grades the implementation's claims — the premise challenge pointed at the implementer | [audit.md](./skills/wrapup/references/audit.md) |
 | Pitch & explainer | after | One demo-first buy-in doc that answers reviewers' objections before they ask | [pitch.md](./skills/wrapup/references/pitch.md) |
-| Understanding quiz | after | Report covering what diffs don't show, then a strictly graded quiz that gates the merge | [quiz.md](./skills/wrapup/references/quiz.md) |
+| Understanding quiz | after | Report covering what diffs don't show, then a strictly graded quiz — the understanding axis of the merge verdict | [quiz.md](./skills/wrapup/references/quiz.md) |
 
 </details>
 
 Wrapup closes two loops, not one: it promotes this session's surprises into permanent
-context (better map), and asks *which of these could kickoff have caught, and why
-didn't it* (better map-making).
+context (better map), and asks *which barrier should have caught this — a kickoff
+technique that didn't fire, a contract line never written — and why didn't it* (better
+map-making).
 
 ## Install
 
@@ -202,13 +213,35 @@ speaking**. Triggering works in any language via semantic matching; 中文 trigg
 - **Moments, not taxonomy.** People reliably feel *starting* and *finishing*; they don't
   reliably notice "I have unknown knowns." Commands map to the former; the agent handles
   the latter.
-- **Progressive disclosure.** Three entry points; nine techniques as reference files
+- **Progressive disclosure.** Three entry points; the techniques as reference files
   read on demand — cheap on context until needed.
 - **Portable by construction.** Frontmatter is only `name` + `description` (the open
   [Agent Skills](https://agentskills.io) format); bodies contain no agent-specific tool
   names.
 - **Honest exits（不知为不知）.** When you don't know, say you don't know: "just
   implement" and "NOT YET" are first-class outcomes, not failures.
+- **The author is never the judge.** The plan pre-commits its pass bars before results
+  exist; the implementer records evidence but never grades it; the audit re-runs checks
+  instead of trusting logs; and understanding (PASS) is never conflated with
+  correctness (the contract tally). Boundaries are drawn by ownership — intent, value
+  tradeoffs, irreversible actions, security surface, outward promises always stop and
+  ask — not by capability, which shifts with every model release.
+- **Narrative is not evidence.** A session's story of what it did is a map. Verdicts
+  come from re-running commands and reading diffs — the territory — and every "it
+  works" claim cites something visible.
+
+### Honest limits（对自己也一样）
+
+- A skill pack can instruct, not enforce — everything here is honor-system. The design
+  bets on making honesty the path of least resistance: re-running a listed command is
+  easier than faking it.
+- The contract's two-copy lock detects drift, not adversaries — a session that controls
+  the disk can rewrite both copies.
+- A same-session audit cannot be blind; the "(self-audited)" tag is the honest part.
+  Where the host offers a second model or subagents, use them — an AI verifier shares
+  lineage with the AI implementer, and correlated blind spots remain either way.
+- A per-project trust ledger — ceremony that relaxes as track record accumulates — is
+  future work.
 
 ## Credits & license
 
