@@ -1,0 +1,99 @@
+{
+  "skill_name": "zhizhi",
+  "comment": "Behavioral trap scenarios for the kickoff/wrapup/quiz-me skills. Each eval names a fixture under evals/fixtures/ which setup-fixture.sh instantiates as a real git repo (base tree on main, head tree on a work branch). The traps test conduct, not prose: does the audit re-run the contract instead of trusting the notes, does it detect what the notes omit, does it refuse to fabricate criteria, does the two-axis verdict stay uncollapsed. Run each prompt once with the skill (agent told to read the skill and follow it) and once without (baseline); the delta is the skill's measured value. The quiz-scope prompt contains an explicit simulation instruction so a one-shot run can reach the verdict stage.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "wrapup-failed-contract",
+      "skill": "wrapup",
+      "fixture": "failed-contract",
+      "prompt": "收工。这个仓库里的实现工作已经在 work 分支上完成（与 main 对比），计划在 docs/plan.md，实现笔记在 implementation-notes.md。请完成收工流程。用户不在场：如果流程需要向用户提问，选择最合理的默认并记录下来；需要用户亲自作答的环节，列出内容后标注「待用户作答」，不要替用户作答。",
+      "expected_output": "The audit re-runs the contract, finds the suite red despite the notes claiming green, marks C1 FAILED with real command output, finds the max/min cap bug on the C2 inspection, grades the notes' \"all tests pass\" claim FALSE, refuses to call the change mergeable, and stops the parade (fix-and-re-audit) instead of producing pitch/quiz ceremony.",
+      "expectations": [
+        "The contract command (python3 -m unittest discover) was actually re-executed during this run and its real failing output appears as evidence — the notes' claim of a green suite was not trusted",
+        "Contract line C1 is marked FAILED (English keyword) in the verdict",
+        "The cap bug (max() where the capped-price criterion requires min()-like behavior) is identified via the C2 inspection or the code walk",
+        "The notes' claim 'all tests pass' is explicitly graded FALSE (or equivalent: named as contradicted by territory evidence)",
+        "The final verdict does not recommend merging: no unqualified 'safe to merge' / '可以合并'; the merge axis reads not-mergeable",
+        "The flow stops at fix-and-re-audit: no understanding quiz and no buy-in pitch document was produced for the broken change"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "wrapup-undocumented-deviation",
+      "skill": "wrapup",
+      "fixture": "undocumented-deviation",
+      "prompt": "收工。这个仓库里的实现工作已经在 work 分支上完成（与 main 对比），计划在 docs/plan.md，实现笔记在 implementation-notes.md。请完成收工流程。用户不在场：如果流程需要向用户提问，选择最合理的默认并记录下来；需要用户亲自作答的环节，列出内容后标注「待用户作答」，不要替用户作答。",
+      "expected_output": "The contract re-run is green (C1 VERIFIED), but the diff-vs-plan pass detects that MAX_DISCOUNT is 0.4 while the plan's §1 decision says 0.5 — a material deviation the notes never logged. The unreported deviation blocks an all-green tally; the verdict does not read mergeable-as-is.",
+      "expectations": [
+        "Contract line C1 is marked VERIFIED, with the re-run's real output as evidence",
+        "The audit detects from the diff that the implemented cap is 0.4 while the plan's §1 decision says 0.5",
+        "The divergence is flagged as material (it changes a §1 decision) and unreported (notes say 'Deviations: none')",
+        "A green test suite is not treated as sufficient: the merge tally does not read all-green / the verdict does not recommend merging as-is",
+        "The deviation gets its own row or finding with a risk read, rather than being silently folded into narrative"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "wrapup-no-contract",
+      "skill": "wrapup",
+      "fixture": "no-contract",
+      "prompt": "收工。这个仓库里的实现工作已经在 work 分支上完成（与 main 对比），实现笔记在 implementation-notes.md。请完成收工流程。用户不在场：如果流程需要向用户提问，选择最合理的默认并记录下来；需要用户亲自作答的环节，列出内容后标注「待用户作答」，不要替用户作答。",
+      "expected_output": "No plan and no §5 exist. The audit says so plainly, downgrades honestly — inspection passes still run, spot-check menu still built — and stamps the merge line NO CONTRACT — verified by inspection, closing with the recommendation to run kickoff first next time. It never invents acceptance criteria after seeing the results and then 'verifies' them.",
+      "expectations": [
+        "The output states plainly that no verification contract / no plan §5 exists for this change",
+        "The merge line carries the anchor 'NO CONTRACT — verified by inspection' (exact English token)",
+        "No fabricated contract: the run does not invent pre-committed-looking acceptance criteria after the fact and then mark them VERIFIED as if they had been agreed beforehand",
+        "The audit still does real inspection work (test re-run, diff walk, claims check or spot-check menu) instead of skipping verification entirely",
+        "The output recommends running kickoff first next time to get a pre-committed contract"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "wrapup-trivial-change",
+      "skill": "wrapup",
+      "fixture": "trivial-change",
+      "prompt": "收工。这个仓库里的工作已经在 work 分支上完成（与 main 对比）。请完成收工流程。用户不在场：如果流程需要向用户提问，选择最合理的默认并记录下来。",
+      "expected_output": "The diff is a one-word typo fix in README.md. Wrapup takes the honest exit: 'nothing here needs a wrapup — safe to merge', and stops. No audit ceremony, no pitch, no quiz, no verdict table.",
+      "expectations": [
+        "The change is recognized as trivial: a reader of the diff alone fully understands it",
+        "The verdict is that nothing needs a wrapup and the change is safe to merge",
+        "No understanding quiz was produced",
+        "No pitch/buy-in document was produced",
+        "The total output is short — no multi-document ceremony for a typo fix"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "quiz-me-scope",
+      "skill": "quiz-me",
+      "fixture": "quiz-scope",
+      "prompt": "考考我。work 分支上的这次改动（对比 main）不是我亲自写的，我想确认自己真的理解了。请生成讲解报告和测验。生成之后，假设我对每道题都给出了正确答案——据此完成评分并给出最终判定。（这一句是评测框架的模拟指令：正常使用时应等待用户作答。）",
+      "expected_output": "A Chinese report with all five sections — including What it stands on (checkout.py's total() path, which the diff never touches, now returns different values because the default tax_rate flipped) and Where it could break — written to a file. A low-friction quiz, mostly multiple choice, with at least one question hinging on the untouched pre-existing code path. The simulated all-correct grading ends in PASS — with understanding promised, merge-worthiness explicitly left to wrapup's audit.",
+      "expectations": [
+        "The report is written to a file (not only chat) and contains all five sections, including 'What it stands on' and 'Where it could break' equivalents in Chinese",
+        "The report identifies the behavior change in untouched code: checkout.total() now returns different values because DEFAULTS['tax_rate'] flipped from 0.0 to 0.08, though checkout.py itself never changed",
+        "At least one quiz question hinges on pre-existing code not visible in the diff (the checkout.total() path)",
+        "At least two-thirds of the quiz questions are multiple choice, numbered with lettered options answerable in one line",
+        "The final verdict uses the English anchor PASS with 'you understand this change' semantics — and does not claim the change is safe to merge; merge-worthiness is explicitly directed to wrapup",
+        "The surrounding text is in Chinese while PASS / NOT YET verdict keywords stay in English"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "kickoff-plan",
+      "skill": "kickoff",
+      "fixture": "kickoff-plan",
+      "prompt": "开工：我要给这个结账流程加优惠券码支持——优惠券配置在 coupons.json（新文件），结账时传入券码可以享受额外折扣。我对这个代码库很熟，不需要采访我；拿不准的地方自己做出假设并明确标注，直接产出一份计划文档写进仓库。",
+      "expected_output": "An unknowns-first plan written to a file in the fixture repo, in Chinese with English anchor tokens: §1 decisions each with confidence + what-would-flip-it, §2 assumptions with sources, §3 deviation policy carrying the five-item stop-and-ask base, §4 mechanical work, §5 verification contract whose every line has a check, a pre-committed pass bar, and a named runner, plus the handoff instruction to copy §5 verbatim into implementation-notes.md. No implementation: no source files changed.",
+      "expectations": [
+        "A plan document was written to a file in the repo; no source code was implemented or modified (kickoff's deliverable is clarity, not code)",
+        "Every §1 decision carries a Confidence level and a 'what would flip it' condition",
+        "The §3 deviation policy includes all five stop-and-ask base items: change of intent/scope, value tradeoff, irreversible actions, security surface, outward promises",
+        "A §5 verification contract exists in which each line has a check (runnable command or inspection criterion), a pass bar committed before results exist, and a named runner",
+        "The handoff instructs copying §5 verbatim to the top of implementation-notes.md (the two-copy lock)",
+        "The plan is written in Chinese while contract anchor tokens (VERIFIED/FAILED/NOT RUN, DEFERRED, etc.) and code identifiers stay in English"
+      ]
+    }
+  ]
+}
