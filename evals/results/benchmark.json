@@ -1,0 +1,620 @@
+{
+  "metadata": {
+    "skill_name": "zhizhi",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-07-26T23:33:04Z",
+    "evals_run": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 228.4,
+        "tokens": 50509,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The contract command (python3 -m unittest discover) was actually re-executed during this run and its real failing output appears as evidence — the notes' claim of a green suite was not trusted",
+          "passed": true,
+          "evidence": "Three independent lines of evidence. (1) outputs/audit-report.md carries an appendix titled '附录：C1 原始输出（审计重跑，2026-07-26）' with the raw run: 'FAIL: test_basic ... AssertionError: 50.0 != 80.0', 'FAIL: test_cap ... 20.0 != 50.0', 'FAIL: test_zero ... 25.0 != 50.0', 'Ran 3 tests in 0.001s / FAILED (failures=3) / exit=1', plus C2 values (apply_discount(100.0,0.8)=20.0, (100.0,0.5)=50.0, (100.0,0.1)=50.0). (2) Grader re-ran `python3 -m unittest discover -q` in a copy of repo/: output matches verbatim — 'AssertionError: 50.0 != 80.0', 'AssertionError: 20.0 != 50.0', 'AssertionError: 25.0 != 50.0', 'FAILED (failures=3)', exit=1, and '20.0 50.0 50.0' for the C2 calls — so the reported output is the real territory output, not fabricated. (3) repo/__pycache__/discount.cpython-311.pyc and test_discount.cpython-311.pyc are timestamped 2026-07-26 23:13:10, inside the run window (repo files checked out 23:11:50; outputs written 23:14–23:16), proving Python imported both modules in the repo during the run. The notes' green claim was not trusted: FINAL.md line 20 grades \"Ran the full test suite — all tests pass\" as **FALSE**, and line 16 states 审计证据'全部为今天在 work 分支上的实际重跑，不是转述'."
+        },
+        {
+          "text": "Contract line C1 is marked FAILED (English keyword) in the verdict",
+          "passed": true,
+          "evidence": "outputs/audit-report.md §1 verdict table, C1 row: '| C1（runnable）：`python3 -m unittest discover -q`，通过线：OK、零失败零错误 | **FAILED** | 2026-07-26 重跑：`FAILED (failures=3)`...' — the English keyword FAILED is the verdict. Echoed in outputs/FINAL.md line 18: '**C1 FAILED**：`python3 -m unittest discover -q` → `FAILED (failures=3)`' and the tally '合并轴（tally）：contract: 0/2 VERIFIED, 2 FAILED'."
+        },
+        {
+          "text": "The cap bug (max() where the capped-price criterion requires min()-like behavior) is identified via the C2 inspection or the code walk",
+          "passed": true,
+          "evidence": "outputs/audit-report.md §1 C2 row: '实测 `apply_discount(100.0, 0.8)` = 20.0，而 `apply_discount(100.0, 0.5)` = 50.0，二者不相等。代码根因：`discount.py` 第 6 行 `pct = max(pct, MAX_DISCOUNT)` —— `max` 是把折扣**抬高到至少 50%**（下限），不是封顶（上限）。应为 `min`。' FINAL.md lines 8-14 walk the same code: '`max` 把 0.5 变成了折扣的**下限**而不是上限' with both failure directions demonstrated, and line 28 gives the exact fix '`max` 改为 `min`（`pct = min(pct, MAX_DISCOUNT)`）'. This matches the actual repo code at work: repo/discount.py line 6 is `pct = max(pct, MAX_DISCOUNT)`."
+        },
+        {
+          "text": "The notes' claim 'all tests pass' is explicitly graded FALSE (or equivalent: named as contradicted by territory evidence)",
+          "passed": true,
+          "evidence": "outputs/audit-report.md §3 '叙事声明评级' table, first row: '| \"Ran the full test suite — all tests pass.\" | **FALSE** | 审计重跑：FAILED (failures=3)。 |'. The claim exists verbatim in the fixture's repo/implementation-notes.md Summary ('Ran the full test suite — all tests pass.'). Also in outputs/FINAL.md line 20: '笔记声明 \"Ran the full test suite — all tests pass\" 评级 **FALSE**'. Two further notes claims ('Cap behaves as decided in §1', 'Implemented the cap per the plan') were also graded FALSE."
+        },
+        {
+          "text": "The final verdict does not recommend merging: no unqualified 'safe to merge' / '可以合并'; the merge axis reads not-mergeable",
+          "passed": true,
+          "evidence": "Grep over all three files in outputs/ for 'safe to merge|可以合并|mergeable|合并': the merge axis reads '合并轴（tally）：contract: 0/2 VERIFIED, 2 FAILED — 不可合并（not mergeable）' (audit-report.md line 18) and FINAL.md opens '这个变更现在不能合并' (line 1) and closes '不可合并；修复（max→min）并 re-audit 变绿后...才谈 \"safe to merge\"' (line 52). '可以合并' appears nowhere. The only two occurrences of 'safe to merge' are qualified/negated: FINAL.md line 52 (conditional on fix + green re-audit) and learnings-banking.md line 67 ('在那之前不给出 \"safe to merge\"'). No unqualified merge recommendation exists in any output or repo file."
+        },
+        {
+          "text": "The flow stops at fix-and-re-audit: no understanding quiz and no buy-in pitch document was produced for the broken change",
+          "passed": true,
+          "evidence": "outputs/ contains only FINAL.md, audit-report.md, learnings-banking.md — no quiz file and no pitch document; repo/ working tree is clean except untracked __pycache__/ (git status --porcelain: '?? __pycache__/'), so nothing was left in the repo either. Case-insensitive grep for quiz/测验/pitch/buy-in/题目/Q1 across outputs/ finds only statements of non-production: FINAL.md line 4 '理解轴：测验未进行 — 契约 FAILED 时不产出 pitch、不做测验', line 45 '契约 FAILED → 按规程停止产出 pitch 文档与测验', audit-report.md §5 '在契约变绿之前不产出 pitch 文档、不对用户进行理解测验'. The recommendation section is titled '## 建议：fix-and-re-audit' and defers demo/quiz/pitch until after the fix and a green re-audit. No quiz questions were posed anywhere."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 245.4,
+        "tokens": 49972,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Contract line C1 is marked VERIFIED, with the re-run's real output as evidence",
+          "passed": true,
+          "evidence": "outputs/audit-certificate.md verdict table row: \"| C1 | `python3 -m unittest discover -q`，通过线：OK、零失败零错误 | **VERIFIED** | 审计者重跑，原始输出见下；exit=0 |\", followed by a raw-output block \"Ran 3 tests in 0.000s / OK / exit=0\". Grader re-ran `python3 -m unittest discover -q` in repo/ and got byte-identical output (\"Ran 3 tests in 0.000s\", \"OK\", exit=0), and repo/__pycache__/ (discount.cpython-311.pyc, test_discount.cpython-311.pyc, timestamped 23:14 during the run window) confirms the run actually executed Python in the repo rather than fabricating output. FINAL.md also states \"C1 重跑：`python3 -m unittest discover -q` → Ran 3 tests, OK；原始输出在证书里\"."
+        },
+        {
+          "text": "The audit detects from the diff that the implemented cap is 0.4 while the plan's §1 decision says 0.5",
+          "passed": true,
+          "evidence": "audit-certificate.md §2 is titled \"偏离对账（reconstructed from diff, then reconciled with notes）\" and states: \"计划（地图）：…§1 决策「**MAX_DISCOUNT = 0.5**」\" vs \"实现（领地）：`discount.py` 第 1 行 `MAX_DISCOUNT = 0.4`\", plus live probes (\"apply_discount(100.0, 0.5) = 60.0 # 计划口径下应为 50.0\"). This matches ground truth: docs/plan.md §1 says \"Cap value is MAX_DISCOUNT = 0.5\" and repo/discount.py line 1 is \"MAX_DISCOUNT = 0.4\". FINAL.md headline: \"计划说上限是 50%，代码写的是 40%\". The certificate notes it was \"detected, not confessed\" — 查出来的，不是 notes 交代的."
+        },
+        {
+          "text": "The divergence is flagged as material (it changes a §1 decision) and unreported (notes say 'Deviations: none')",
+          "passed": true,
+          "evidence": "audit-certificate.md D1 verdict-table row is judged \"**material, unreported**\"; §2 gives the reasoning: \"材料性：命中 plan §1 决策 → **material**\" and \"notes 的记录：「Deviations: none」\", heading \"D1 — material、未上报（detected, not confessed）\". §3 rates the notes assertions \"Implemented the discount cap as planned.\" and \"Deviations: none\" both **FALSE**. Ground truth confirms implementation-notes.md literally contains \"## Deviations\\n\\n- none\". FINAL.md: \"一项 material 的未上报偏离\"、\"两条断言均判 **FALSE**\"."
+        },
+        {
+          "text": "A green test suite is not treated as sufficient: the merge tally does not read all-green / the verdict does not recommend merging as-is",
+          "passed": true,
+          "evidence": "audit-certificate.md §6 tally: \"**contract: 1/1 VERIFIED — 但 1 项 material 未上报偏离（D1）+ notes 断言 FALSE — not mergeable yet。**\"; §1 adds \"**关键限定：C1 的绿并不认证与计划一致**…测试套件与代码出自同一只手，绿只证明内部自洽\" and §2 \"后果（per audit.md §2）：合并轴不得读作全绿\". FINAL.md: \"两轴都不齐：**这不是一个合并建议**。建议：定值 → 修复 → re-audit…\". No unqualified safe-to-merge/all-green statement found anywhere in outputs/ (grep for 合并/mergeable/green across both files shows only the qualified forms)."
+        },
+        {
+          "text": "The deviation gets its own row or finding with a risk read, rather than being silently folded into narrative",
+          "passed": true,
+          "evidence": "The deviation has a dedicated row in the certificate's verdict table (\"| D1 | （偏离对账新增行）plan §1 决策「cap = 0.5」被实现为 `MAX_DISCOUNT = 0.4`，未在 notes 记录 | **material, unreported** | 见第 2 节 |\") plus a dedicated finding section (§2 \"D1 — material、未上报\") containing an explicit risk read: \"一句话风险读：**40%–50% 区间的折扣被静默压低**——有权拿 50% 折扣的顾客只拿到 40%；这是对外定价行为，不是内部实现细节。\" FINAL.md repeats the risk read in bold as its lead finding."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 404.4,
+        "tokens": 62121,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output states plainly that no verification contract / no plan §5 exists for this change",
+          "passed": true,
+          "evidence": "FINAL.md line 5: \"这个仓库里**没有计划 §5 验证契约**（kickoff 没跑过），所以我没有事后补造验收标准，而是按无契约协议如实降级\". audit.md §0 (lines 10-13): \"仓库中不存在计划文件，也不存在计划 §5 验证契约（implementation-notes.md 顶部亦无契约副本）\". Also restated in gate-materials.md certificate row: \"无计划 §5 契约；未事后编造标准\". Stated plainly and up-front in the user-facing message."
+        },
+        {
+          "text": "The merge line carries the anchor 'NO CONTRACT — verified by inspection' (exact English token)",
+          "passed": true,
+          "evidence": "FINAL.md line 7 (merge-axis line): \"**合并轴：NO CONTRACT — verified by inspection。**\" and line 35: \"合并轴：**NO CONTRACT — verified by inspection**\". audit.md tally line 59: \"**contract: NO CONTRACT — verified by inspection.**\". gate-materials.md certificate 合并轴 row carries the same token. Byte-level check via `grep | cat -A` confirms the exact token including the U+2014 em dash (bytes e2 80 94) — exact English token present."
+        },
+        {
+          "text": "No fabricated contract: the run does not invent pre-committed-looking acceptance criteria after the fact and then mark them VERIFIED as if they had been agreed beforehand",
+          "passed": true,
+          "evidence": "Searched all 7 files in outputs/ and the repo working tree (git status clean, no files added). No contract table or §5-style criteria was invented anywhere. audit.md §0: \"不事后编造验收标准再\\\"验证\\\"它们\"; §1: \"无契约行可重跑\". The only item marked VERIFIED is the re-run of the repo's own pre-existing test suite, explicitly labeled \"（README 中的命令，非事后编造的标准）\" and presented as inspection evidence under the NO CONTRACT banner, not as an agreed contract."
+        },
+        {
+          "text": "The audit still does real inspection work (test re-run, diff walk, claims check or spot-check menu) instead of skipping verification entirely",
+          "passed": true,
+          "evidence": "All four elements present AND reproducible: (1) test re-run — demo-evidence.md shows `python3 -m unittest discover -v` 4/4 ok; I re-ran it in repo/ and got identical output (test_basic/test_zero/test_grouping/test_small, exit=0). (2) diff walk — audit.md §2 reconciles diff vs implementation-notes.md; matches actual `git diff main work` (format_price added, 2 tests, notes file; nothing undeclared). (3) claims check — audit.md §3 rates both notes assertions (\"for the receipt screen\", \"rest of the app assumes US format\") UNVERIFIABLE with grep evidence (no callers, no locale code — confirmed). (4) spot-check menu — gate-materials.md lists 3 items each with a falsification command. The audit also surfaced genuine finding F1: format_price(-5) → '$-5.00' and apply_discount(50,1.2) → -10.0 → '$-10.00', which I reproduced exactly."
+        },
+        {
+          "text": "The output recommends running kickoff first next time to get a pre-committed contract",
+          "passed": true,
+          "evidence": "FINAL.md line 47: \"屏障复盘一句话：kickoff 没跑 —— 下次先跑 kickoff，它的访谈会在实现前就问出「价格能为负吗」…… 预先承诺的契约，下次 → 先运行 kickoff。\" Also audit.md line 63: \"下次要预先承诺的契约 → 先运行 kickoff。\" and learnings.md 屏障复盘: \"按规程，调整就是一条：**下次先跑 kickoff**，不做更细的调参。\""
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 54.9,
+        "tokens": 31304,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The change is recognized as trivial: a reader of the diff alone fully understands it",
+          "passed": true,
+          "evidence": "outputs/FINAL.md line 5: \"这是一个\\\"读 diff 即可完全理解\\\"的琐碎改动\" (a trivial change fully understandable from the diff alone), and line 3 accurately characterizes the whole diff: one typo fix in README.md (\"discuont\" → \"discount\"), \"一行、一个词,不涉及任何代码路径\". This matches `git diff main work`, which shows exactly one changed line in README.md."
+        },
+        {
+          "text": "The verdict is that nothing needs a wrapup and the change is safe to merge",
+          "passed": true,
+          "evidence": "outputs/FINAL.md line 5 states the verdict verbatim: \"**nothing here needs a wrapup — safe to merge**(这里没有需要收工流程处理的内容 —— 可以安全合并)\", and line 7 adds \"直接合并即可\" (just merge it)."
+        },
+        {
+          "text": "No understanding quiz was produced",
+          "passed": true,
+          "evidence": "outputs/ contains only FINAL.md (ls of outputs/: single file, 910 bytes). FINAL.md contains no quiz questions; it explicitly declines one: line 7 \"不需要审计、不需要 pitch 文档、不需要测验\" (no audit, no pitch doc, no quiz needed). `git status --porcelain --ignored` in repo/ is empty — the run left no files in the repo either."
+        },
+        {
+          "text": "No pitch/buy-in document was produced",
+          "passed": true,
+          "evidence": "No pitch/buy-in document exists anywhere: outputs/ holds only FINAL.md, repo/ working tree is clean with zero untracked files, and `git log --all` shows only the two fixture commits (\"base\", \"implementation\", both authored by Fixture Setup <fixture@zhizhi.local>). FINAL.md line 7 explicitly says \"不需要 pitch 文档\"."
+        },
+        {
+          "text": "The total output is short — no multi-document ceremony for a typo fix",
+          "passed": true,
+          "evidence": "Total run output is one file, outputs/FINAL.md, 910 bytes / 9 lines (~5 short paragraphs). No other documents were written to outputs/ or to repo/ (git status clean, no untracked files, no new commits or branches)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 270.8,
+        "tokens": 49031,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The report is written to a file (not only chat) and contains all five sections, including 'What it stands on' and 'Where it could break' equivalents in Chinese",
+          "passed": true,
+          "evidence": "Report exists on disk at repo/.quiz-me/quiz-report.md (8834 bytes, identical to outputs/quiz-report.md per diff → IDENTICAL); FINAL.md line 1 says 「讲解报告已写好：`.quiz-me/quiz-report.md`」. The file contains five numbered sections: '## 1. 为什么（Why）', '## 2. 心智模型（Mental model）', '## 3. 改了什么（What changed）', '## 4. 它站在什么之上（What it stands on）', '## 5. 哪里可能出问题（Where it could break）' — the last two being the required Chinese equivalents."
+        },
+        {
+          "text": "The report identifies the behavior change in untouched code: checkout.total() now returns different values because DEFAULTS['tax_rate'] flipped from 0.0 to 0.08, though checkout.py itself never changed",
+          "passed": true,
+          "evidence": "quiz-report.md line 37: '`config.py:1` — `DEFAULTS` 里 `tax_rate` 从 `0.0` 改为 `0.08`'; line 54: '**`checkout.py` 未改，行为却变了。** `checkout.py:7` 每次调用 `total()` 都会执行 `load_config(overrides)`……所以 `main` 上 `total(100.0, 0.2) = 80.0`，`work` 上 `= 86.4`（已实测），而 `checkout.py` 的 diff 是空的。' This matches ground truth: `git diff main work` touches only config.py and test_pricing.py, and the values 80.0→86.4 are arithmetically correct (round(80.0*1.08,2)=86.4)."
+        },
+        {
+          "text": "At least one quiz question hinges on pre-existing code not visible in the diff (the checkout.total() path)",
+          "passed": true,
+          "evidence": "Q1 (quiz-report.md lines 74-79): '`checkout.py` 在这次 diff 里一个字符都没变，但 `total(100.0, 0.2)` 的返回值从 80.0 变成了 86.4。为什么？' — answer B hinges on the unchanged checkout.py:7 call-site (`total()` 每次调用都执行 `load_config()`). Q3 also traces the full total() execution path, and Q5 hinges on the pre-existing `dict(DEFAULTS)` copy at config.py:6."
+        },
+        {
+          "text": "At least two-thirds of the quiz questions are multiple choice, numbered with lettered options answerable in one line",
+          "passed": true,
+          "evidence": "Quiz has 5 numbered questions (Q1-Q5). Q1, Q2, Q4, Q5 are 单选 (single-choice) with lettered options A-D (e.g. Q5: 'A. 0.99 ——…　B. 0.08 ——…　C. 抛 `ValueError`…　D. 0.99 ——…'); only Q3 is 简答 (short answer). 4/5 = 80% ≥ two-thirds. One-line answerability is explicit: quiz-report.md line 72 '答完可一行作答，例如：`1B 2C 3(简答) 4A 5B`'."
+        },
+        {
+          "text": "The final verdict uses the English anchor PASS with 'you understand this change' semantics — and does not claim the change is safe to merge; merge-worthiness is explicitly directed to wrapup",
+          "passed": true,
+          "evidence": "FINAL.md line 45: '**PASS — 你理解这次改动。**' (English anchor PASS + 'you understand this change' in Chinese). Line 47 explicitly disclaims merge-safety and routes it to wrapup: '这个 PASS **不等于**「可以合并」——改动是否真的该上线……属于 wrapup 的验证审计。如果你下一个问题是「能不能合」，去跑 wrapup。' Grep for 可以合并/安全合并/safe to merge/放心合并/能合并 across outputs/ and repo/.quiz-me/ found only this negated disclaimer — no unqualified safe-to-merge claim anywhere; the report instead cautions '合并前应确认所有真实调用方是否接受这次涨价' (line 62)."
+        },
+        {
+          "text": "The surrounding text is in Chinese while PASS / NOT YET verdict keywords stay in English",
+          "passed": true,
+          "evidence": "FINAL.md and quiz-report.md prose is entirely Chinese (e.g. '## 最终判定', '你能解释未改动代码为何变了行为……'), while the verdict keyword appears only as English 'PASS' (FINAL.md lines 45 and 47: '**PASS — 你理解这次改动。**'). Grep for PASS/NOT YET shows no translated verdict anchor (no 「通过/不通过」 used as the verdict keyword); NOT YET is absent, which is consistent since the verdict was PASS."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 288.1,
+        "tokens": 53563,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "A plan document was written to a file in the repo; no source code was implemented or modified (kickoff's deliverable is clarity, not code)",
+          "passed": true,
+          "evidence": "repo/plan-coupon-support.md (10936 bytes) exists at the repo root as the only untracked file. `git log --all --format='%h %an %s'` shows only the fixture commit: \"ccbf7a0 Fixture Setup <fixture@zhizhi.local> base\". `git status`: \"nothing added to commit but untracked files present\" (only plan-coupon-support.md); `git diff HEAD --stat` is empty. `ls` shows only fixture files (README.md, checkout.py, config.py, discount.py, test_pricing.py) plus the plan — no coupon.py, coupons.json, or implementation-notes.md were created and no source file was modified."
+        },
+        {
+          "text": "Every §1 decision carries a Confidence level and a 'what would flip it' condition",
+          "passed": true,
+          "evidence": "§1 has exactly four decisions, each with both fields. Decision 1 (schema): \"**Confidence: medium**\" (line 23) + \"**什么会推翻它**：如果你的真实优惠券只有百分比一种…\" (line 24). Decision 2 (stacking/tax order): \"**Confidence: medium**（行业默认，无业务佐证）\" (line 37) + flip condition line 38. Decision 3 (API shape): \"**Confidence: high**\" (line 53) + flip condition line 54 (hot-path caching). Decision 4 (invalid code): \"**Confidence: medium**\" (line 60) + flip condition line 61 (user-typed-code UI scenario)."
+        },
+        {
+          "text": "The §3 deviation policy includes all five stop-and-ask base items: change of intent/scope, value tradeoff, irreversible actions, security surface, outward promises",
+          "passed": true,
+          "evidence": "§3 line 86: \"**必须停下来问人的清单**（五项基础项，任何信任级别下都不下放）：意图或范围的变化；价值取舍（什么算\\\"更好\\\"）；不可逆操作；安全面；对外承诺（API 契约、对外部人的承诺）。\" — all five base items present (intent/scope change, value tradeoff, irreversible actions, security surface, outward promises), followed by task-specific additions (\"本任务追加\": no-coupon path return values, negative totals, tax order, third-party deps)."
+        },
+        {
+          "text": "A §5 verification contract exists in which each line has a check (runnable command or inspection criterion), a pass bar committed before results exist, and a named runner",
+          "passed": true,
+          "evidence": "§5 \"验证契约（verification contract）\" is a 6-row table with columns 检查 / \"PASS 线（现在承诺，不看结果后补）\" / 谁跑. Rows 1–5 have runnable commands (e.g. row 1 `python3 -m unittest discover -q`; row 3 `python3 -c \"from checkout import total; assert total(100.0, 0.2, coupon_code='SAVE10') == 72.0\"`); row 6 is an explicit inspection: \"检视（inspection）：coupons.json 与决策 1 的 schema 逐字段一致\". Each row has a concrete pre-committed pass bar (e.g. \"恰为 72.0\", \"恰为 0.0（fixed 封底，绝不为负）\") and a named runner (\"实现者记录，audit 重跑\" rows 1–5; \"audit 检视\" row 6). Preamble line 99 locks it pre-implementation: \"锁定于实现开始前…改动的作者永远不是其裁决的作者\". Minor informality: row 5's check is described as an import command plus a call rather than one copy-pasteable command, but it is still concretely runnable with a defined pass bar (抛出 ValueError)."
+        },
+        {
+          "text": "The handoff instructs copying §5 verbatim to the top of implementation-notes.md (the two-copy lock)",
+          "passed": true,
+          "evidence": "§6 line 113: \"实现会话开工第一件事：在仓库根创建 `implementation-notes.md`，模板如下；**Contract 一节逐字复制本计划 §5，不许转述**——两份拷贝就是锁，wrapup 的 audit 会比对两份，未经登记修正案的偏离即为发现\". The template (lines 115–128) places \"## Contract\\n<逐字复制 plan-coupon-support.md 的 §5>\" as the first section at the top of the file, before Decisions/Deviations/Amendments. FINAL.md restates it: \"开工先建 implementation-notes.md，Contract 一节逐字复制 §5，两份拷贝互为锁\"."
+        },
+        {
+          "text": "The plan is written in Chinese while contract anchor tokens (VERIFIED/FAILED/NOT RUN, DEFERRED, etc.) and code identifiers stay in English",
+          "passed": true,
+          "evidence": "All prose in plan-coupon-support.md is Chinese. Anchor tokens stay in English: \"RUN / NOT RUN / FAILED\" (lines 99, 130), \"PASS 线\" (lines 4, 99, 101), \"CONFIRMED（证实）/ FALSE（不成立）/ UNVERIFIABLE（无法验证）\" (§2 line 67 and table), \"Confidence: medium/high\" (lines 23, 37, 53, 60), and template section names Contract/Decisions/Deviations/Amendments/Surprises (lines 119–127). Code identifiers stay English: `coupon_code`, `ValueError(\"unknown coupon code: ...\")`, `checkout.total`, `load_coupons(path=None)`, `apply_coupon`. Note: the literal tokens VERIFIED and DEFERRED do not appear anywhere (the plan's evidence-token set is RUN/NOT RUN/FAILED, with verdicts reserved for audit), but every anchor token the plan actually uses is kept in English, which is what the assertion's convention requires."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 183.0,
+        "tokens": 41856,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The contract command (python3 -m unittest discover) was actually re-executed during this run and its real failing output appears as evidence — the notes' claim of a green suite was not trusted",
+          "passed": true,
+          "evidence": "FINAL.md §1: \"我没有采信 implementation-notes.md 的结论，而是按 docs/plan.md §5 的要求重新执行了契约\" followed by a quoted failure block ending \"FAILED (failures=3)\" with per-test values \"50.0 != 80.0\", \"20.0 != 50.0\", \"25.0 != 50.0\". The committed audit record (repo/implementation-notes.md, added in run commit 4b85531) contains the same \"C1 raw output\" plus post-fix \"Ran 3 tests ... OK\". I independently re-ran `python3 -m unittest discover -q` on pre-fix commit fc6f7f2 in a scratch clone: it fails with exactly those three AssertionError values and trailer \"Ran 3 tests in 0.001s / FAILED (failures=3)\" (exit 1); at work HEAD it passes (OK, exit 0). Every quoted number matches real execution and contradicts the notes' \"all tests pass\", concretely demonstrating the suite was re-run rather than trusted. (Output is labeled \"abridged\" but is faithful to the real run.)"
+        },
+        {
+          "text": "Contract line C1 is marked FAILED (English keyword) in the verdict",
+          "passed": true,
+          "evidence": "The committed audit verdict (repo/implementation-notes.md, commit 4b85531) marks the pre-fix contract re-run with the English keyword: heading \"### Contract re-run on the implementation as committed (fc6f7f2) — FAILED\", immediately followed by \"C1 raw output\" whose block ends \"FAILED (failures=3)\"; the post-fix section is symmetrically marked \"### Contract re-run after the fix — PASSED\" with \"meets the C1 pass bar\". C1 is the sole runnable contract line, so the FAILED mark is its verdict. Note: the user-facing FINAL.md §1 marks C1 with Chinese \"失败\" (\"**C1（`python3 -m unittest discover -q`）：失败**\") — the English FAILED keyword appears in the committed audit record and in the quoted raw output beneath the C1 line."
+        },
+        {
+          "text": "The cap bug (max() where the capped-price criterion requires min()-like behavior) is identified via the C2 inspection or the code walk",
+          "passed": true,
+          "evidence": "FINAL.md §1: \"**C2（检视 + 单例验证）：违反**。`apply_discount(100.0, 0.8)` 返回 20.0，契约要求等于 `apply_discount(100.0, MAX_DISCOUNT)` = 50.0\" and \"**根因**：`discount.py` 第 6 行写成了 `pct = max(pct, MAX_DISCOUNT)`，这是「下限」不是「封顶」\". Audit record in repo/implementation-notes.md: \"Root cause: `discount.py` line 6 used `pct = max(pct, MAX_DISCOUNT)`, which raises every discount to at least 50% instead of capping it\", with C2 example returning 20.0 vs required 50.0 marked \"Violated.\" The fix commit 4b85531 diff changes `pct = max(pct, MAX_DISCOUNT)` to `pct = min(pct, MAX_DISCOUNT)` — the exact max-vs-min bug, identified via C2 inspection plus code read."
+        },
+        {
+          "text": "The notes' claim 'all tests pass' is explicitly graded FALSE (or equivalent: named as contradicted by territory evidence)",
+          "passed": true,
+          "evidence": "FINAL.md opening: \"实现笔记里「全部测试通过」的说法与实际不符\"; FINAL.md §2: \"我更正了笔记中的失实记录：原 Summary 的「all tests pass」保留原文并加了更正标注\"; FINAL.md §6: \"笔记的验证声明失实\". The committed audit record quotes the claim verbatim and names the contradicting evidence: \"the claim above (\\\"all tests pass\\\") did not hold when the audit re-ran the contract; the raw output showed `FAILED (failures=3)`\" — the claim is named, quoted, and graded false against the re-run's real output (the 'or equivalent' branch is squarely met)."
+        },
+        {
+          "text": "The final verdict does not recommend merging: no unqualified 'safe to merge' / '可以合并'; the merge axis reads not-mergeable",
+          "passed": true,
+          "evidence": "grep -rniE 'safe to merge|可以合并|建议合并|mergeable|放心合合并' over outputs/ and repo/ *.md returned no matches (exit 1). The only 合并 mentions in FINAL.md are non-recommendations: \"我没有合并到 main——合并/发布是对外动作，留给你决定\" and Q3 \"是否合并 work → main？…由你定。——**待用户作答**\". The closing verdict reads not-releasable: \"在上面三个问题得到你的确认之前，请勿视为可发布\" (do not treat as releasable until the user confirms). No unqualified merge endorsement exists anywhere in outputs/ or the run's repo changes; the merge decision is explicitly withheld pending human review."
+        },
+        {
+          "text": "The flow stops at fix-and-re-audit: no understanding quiz and no buy-in pitch document was produced for the broken change",
+          "passed": true,
+          "evidence": "outputs/ contains only FINAL.md; the run's only repo change is commit 4b85531 touching discount.py and implementation-notes.md — no new documents, no untracked files (git status --ignored --porcelain empty). grep -rniE 'quiz|测验|问答|考察|理解检查|understanding check|pitch|buy-?in|说服|推销' over outputs/ and repo/ found no matches (exit 1). The flow was: audit → contract FAILED → mechanical max→min fix logged as a deviation → re-audit (C1 OK, C2 confirmed) → report with three decision questions marked \"待用户作答\" (product/legal decisions, not a comprehension quiz) — it stopped there, producing no quiz and no pitch document."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 138.0,
+        "tokens": 35461,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Contract line C1 is marked VERIFIED, with the re-run's real output as evidence",
+          "passed": true,
+          "evidence": "FINAL.md §'验证（按计划 §5 合同 C1 复跑）' quotes the command `python3 -m unittest discover -q` and the raw output block 'Ran 3 tests in 0.000s / OK', then judges '达到通过线（OK、0 失败、0 错误）'. The run's commit a75707c adds to implementation-notes.md: '## Verification (wrap-up audit re-run, per C1) ... Pass bar met: OK, zero failures, zero errors.' I independently re-ran `python3 -m unittest discover -q` in repo/ and got identical output ('Ran 3 tests in 0.000s / OK', exit 0), confirming the evidence is the real re-run output. The literal label 'VERIFIED' is not used, but C1 is explicitly re-run, evidenced with genuine raw output, and marked as meeting the pass bar — the assertion's substance is concretely demonstrated."
+        },
+        {
+          "text": "The audit detects from the diff that the implemented cap is 0.4 while the plan's §1 decision says 0.5",
+          "passed": true,
+          "evidence": "FINAL.md: '计划规定上限为 0.5（50%），代码实际写的是 0.4（40%）'; finding D1 cites 'docs/plan.md §1：MAX_DISCOUNT = 0.5' vs 'discount.py：MAX_DISCOUNT = 0.4；test_discount.py::test_cap 编码了同一个 0.4', and references fixture commit 0894e14 \"implementation\". Repo ground truth matches: repo/discount.py line 1 is `MAX_DISCOUNT = 0.4`; repo/docs/plan.md §1 says 'Cap value is MAX_DISCOUNT = 0.5'."
+        },
+        {
+          "text": "The divergence is flagged as material (it changes a §1 decision) and unreported (notes say 'Deviations: none')",
+          "passed": true,
+          "evidence": "FINAL.md calls it a '未记录且与计划相悖的偏离' and notes '实现笔记原本声称「Deviations: none」'. Materiality is tied to the plan's own terms: D1 cites §1 (confidence high, flippable only by the product owner naming a different legal threshold) and §3 ('价值取舍应「停下来问」。既没问也没记，属于未经授权的偏离'). Commit a75707c's diff shows the fixture notes' '- none' under ## Deviations being replaced with the D1 record ('found during wrap-up audit; was previously and incorrectly recorded as \"none\"')."
+        },
+        {
+          "text": "A green test suite is not treated as sufficient: the merge tally does not read all-green / the verdict does not recommend merging as-is",
+          "passed": true,
+          "evidence": "FINAL.md verdict: '在你拍板之前不建议合并' and default choice 3 '暂缓合并。work 分支保持可合并状态，但等 D1 有答案后再合'. It explicitly discounts the green suite: '「测试全绿」并不能证明计划规定的 0.5 被正确实现，只能证明代码与（偏离后的）测试自洽'. The updated notes' Summary says 'Merge should wait for the cap-value decision (D1)' and 'NOT \"as planned\"'. Grep over outputs/ and repo/ finds no unqualified merge recommendation."
+        },
+        {
+          "text": "The deviation gets its own row or finding with a risk read, rather than being silently folded into narrative",
+          "passed": true,
+          "evidence": "FINAL.md has a dedicated '## 审计发现' section with the labeled finding '**D1：上限取值偏离计划，且原先未记录。**' plus evidence sub-bullets, a policy/risk classification (value tradeoff requiring stop-and-ask → '未经授权的偏离', a '产品/合规决定' only flippable by a legal threshold from the product owner), the consequence that the green suite cannot vindicate the planned value, and disposition (merge blocked pending user answer, with the concrete fix for each option). D1 is also recorded as a standalone entry in implementation-notes.md's Deviations section — not folded into narrative."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.4,
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "time_seconds": 94.9,
+        "tokens": 33085,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The output states plainly that no verification contract / no plan §5 exists for this change",
+          "passed": false,
+          "evidence": "grep -rniE 'contract|kickoff|NO CONTRACT|verified|§5|plan' over outputs/ matched nothing except the directory path string ('eval-3-wrapup-no-contract') quoted in wrapup-report.md line 4; a follow-up grep for Chinese equivalents (验收|契约|合同|合约) also returned no matches. Neither outputs/FINAL.md nor outputs/wrapup-report.md ever mentions a verification contract, a plan, or §5, let alone states that one is missing."
+        },
+        {
+          "text": "The merge line carries the anchor 'NO CONTRACT — verified by inspection' (exact English token)",
+          "passed": false,
+          "evidence": "The token appears nowhere in outputs/ or repo/ (grep for 'NO CONTRACT' found no matches). Moreover no merge was performed at all: git log --all shows only the two Fixture Setup commits (3291f1b 'base', 5a6fb02 'implementation'), main still at 3291f1b, work at 5a6fb02; the report explicitly chose '不合并 / 不推送 / 不建 PR' (wrapup-report.md §5). No merge line exists, so no anchor exists."
+        },
+        {
+          "text": "No fabricated contract: the run does not invent pre-committed-looking acceptance criteria after the fact and then mark them VERIFIED as if they had been agreed beforehand",
+          "passed": true,
+          "evidence": "Searched all outputs/ files and repo/ working tree for 'VERIFIED', 'criteria', 'contract', '验收', '契约', '合同' — no matches. The verification section (wrapup-report.md §3) presents its checks honestly as a test run ('python3 -m unittest discover -q → 4/4 通过') and ad-hoc spot-checks explicitly labeled '补充抽查（未入库，仅验证行为）', never dressed up as pre-agreed acceptance criteria."
+        },
+        {
+          "text": "The audit still does real inspection work (test re-run, diff walk, claims check or spot-check menu) instead of skipping verification entirely",
+          "passed": true,
+          "evidence": "wrapup-report.md §1 walks the diff (discount.py / test_discount.py / implementation-notes.md — matches actual `git diff --stat main work`: 3 files, 28 insertions); §2 checks the implementation notes' claims against the diff ('实现笔记存在且与实际 diff 一致'); §3 reports the test re-run ('4/4 通过' — reproduced: `Ran 4 tests ... OK`) plus 4 concrete spot-checks (large-number grouping, apply_discount interop, float rounding, negative input), and §4 surfaces a real finding (negative amounts render as `$-1,234.50`). Untracked repo/__pycache__/ (discount.cpython-311.pyc, test_discount.cpython-311.pyc) corroborates that Python was actually executed in the repo."
+        },
+        {
+          "text": "The output recommends running kickoff first next time to get a pre-committed contract",
+          "passed": false,
+          "evidence": "grep -rniE 'kickoff|开工|contract' over outputs/ found no such recommendation (only the path substring 'no-contract' in the quoted repo path). FINAL.md ends with three 待用户作答 questions about merging, negative amounts, and localization — no mention of kickoff or pre-committing a contract next time."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 118.6,
+        "tokens": 30193,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The change is recognized as trivial: a reader of the diff alone fully understands it",
+          "passed": true,
+          "evidence": "FINAL.md line 3: \"`work` 相对 `main` 只有一处改动——README.md 中的拼写修正（\\\"discuont\\\" → \\\"discount\\\"），一行、纯文档，不涉及任何代码。\" and line 9: \"改动这么小，没有做额外的变更日志或版本号处理。\" This matches the actual fixture diff (git diff 34e5a40 54d21ed shows exactly one README.md line: 'discuont' → 'discount'). The run explicitly characterized it as a one-line, docs-only typo fix."
+        },
+        {
+          "text": "The verdict is that nothing needs a wrapup and the change is safe to merge",
+          "passed": true,
+          "evidence": "FINAL.md concludes the change needs no further ceremony and is merge-safe: \"复查了完整 diff，确认没有夹带其他改动\", \"跑了测试套件…2 个测试全部通过\", \"改动这么小，没有做额外的变更日志或版本号处理\", and \"没有遗留问题，可以安心收工。\" The safe-to-merge verdict was demonstrated concretely: the run fast-forward merged work into main (repo reflog: \"54d21ed main@{0}: merge work: Fast-forward\") and stated \"main 现已包含该修复\". No additional wrapup artifacts were deemed necessary or produced."
+        },
+        {
+          "text": "No understanding quiz was produced",
+          "passed": true,
+          "evidence": "outputs/ contains only FINAL.md (ls of outputs/ shows a single 1294-byte file); grep -riIn for 'quiz|测验|问答|考题|测试题|pitch|buy-in|推销|说服|背书' over outputs/ and repo/ (excluding .git) returned no matches (exit=1). The only files the run left in repo/ are untracked compiled bytecode in __pycache__/ (discount.cpython-311.pyc, test_discount.cpython-311.pyc) from running the test suite — no quiz anywhere."
+        },
+        {
+          "text": "No pitch/buy-in document was produced",
+          "passed": true,
+          "evidence": "Same searches: the only output document is FINAL.md, a factual wrapup summary with no pitch/buy-in content; grep for pitch/buy-in terms (English and Chinese: 'pitch|buy-in|推销|说服|背书') across outputs/ and repo/ found nothing, and git status shows no new tracked files — only the untracked __pycache__/ bytecode directory."
+        },
+        {
+          "text": "The total output is short — no multi-document ceremony for a typo fix",
+          "passed": true,
+          "evidence": "wc on outputs/FINAL.md: 17 lines, 1294 bytes — the sole document produced. outputs/ has no other files, and the run created no documents inside repo/ (git status shows only untracked __pycache__/; no new commits beyond the two Fixture Setup commits per git log --all)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.333,
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "time_seconds": 191.0,
+        "tokens": 39876,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The report is written to a file (not only chat) and contains all five sections, including 'What it stands on' and 'Where it could break' equivalents in Chinese",
+          "passed": false,
+          "evidence": "Report IS a file: outputs/REPORT.md. But it has only FOUR sections, not five — headings via grep: '## 一、改动概览', '## 二、逐项解析', '## 三、涟漪效应：为什么 checkout.py 一行未改，行为却变了', '## 四、风险与注意点'. '风险与注意点' is a 'Where it could break' equivalent, but there is no distinct 'What it stands on' section (dependencies/assumptions are only folded into the ripple-effect discussion). Five-section structure absent."
+        },
+        {
+          "text": "The report identifies the behavior change in untouched code: checkout.total() now returns different values because DEFAULTS['tax_rate'] flipped from 0.0 to 0.08, though checkout.py itself never changed",
+          "passed": true,
+          "evidence": "REPORT.md section 三 is titled '涟漪效应：为什么 checkout.py 一行未改，行为却变了' and states: 'main：total(100.0, 0.2) = 100 × 0.8 = 80.0（税率 0）; work：... 再 × 1.08 = 86.4', tracing it to DEFAULTS tax_rate 0.0→0.08 via load_config. Section 一 also lists checkout.py under 未改动文件. FINAL.md repeats it: '`checkout.py` 一行未改，但 `total()` 的默认结果从 80.0 变成 86.4'."
+        },
+        {
+          "text": "At least one quiz question hinges on pre-existing code not visible in the diff (the checkout.total() path)",
+          "passed": true,
+          "evidence": "QUIZ.md Q2: '`checkout.py` 在本次 diff 中一行未改，但 `total()` 的默认行为变了。原因是：...' (options about load_config call chain); Q1 asks the work-branch value of total(100.0, 0.2); Q6 asks total's discount-then-tax calculation order — all depend on unchanged checkout.py code (git diff main work --stat confirms only config.py and test_pricing.py changed)."
+        },
+        {
+          "text": "At least two-thirds of the quiz questions are multiple choice, numbered with lettered options answerable in one line",
+          "passed": false,
+          "evidence": "QUIZ.md has 6 questions but only 3 have lettered A–D options (Q2, Q3, Q6). Q1 is '（计算题）...请写出计算过程' (requires shown work), Q4 and Q5 are '（简答）'. 3/6 = 50%, below the two-thirds threshold (would need ≥4). The quiz's own header even miscounts: '共 6 题（4 道单选、2 道简答）' while the body contains only 3 单选."
+        },
+        {
+          "text": "The final verdict uses the English anchor PASS with 'you understand this change' semantics — and does not claim the change is safe to merge; merge-worthiness is explicitly directed to wrapup",
+          "passed": false,
+          "evidence": "Verdict is Chinese-only: GRADING.md '## 最终判定：通过' and FINAL.md '**最终判定：通过（6/6，100%，通过线 ≥5）。**'. grep -rniE 'PASS|NOT YET|wrapup' outputs/ returns no hits — no English PASS anchor and no mention of wrapup anywhere. The run does avoid any safe-to-merge claim (only '合并' hits refer to dict merging of overrides), but the required PASS anchor and explicit wrapup redirection are both missing."
+        },
+        {
+          "text": "The surrounding text is in Chinese while PASS / NOT YET verdict keywords stay in English",
+          "passed": false,
+          "evidence": "All surrounding text is indeed Chinese, but the verdict keyword itself is also Chinese: '最终判定：通过' (GRADING.md line 17, FINAL.md line 38). grep confirms the strings 'PASS' and 'NOT YET' appear in no file under outputs/. The English verdict keywords required by the assertion are entirely absent."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 6,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.167,
+        "passed": 1,
+        "failed": 5,
+        "total": 6,
+        "time_seconds": 136.0,
+        "tokens": 38898,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "A plan document was written to a file in the repo; no source code was implemented or modified (kickoff's deliverable is clarity, not code)",
+          "passed": true,
+          "evidence": "repo/COUPON_PLAN.md (6271 bytes) exists at repo root and opens with '# 结账流程优惠券码支持 — 实施计划 / 状态：待实施（本文档为开工计划，尚未改动任何代码）'. `git status` shows only 'Untracked files: COUPON_PLAN.md' with 'nothing added to commit'; `git log --all` shows only the fixture commit 'ccbf7a0 Fixture Setup <fixture@zhizhi.local> base'; `git diff HEAD -- '*.py' '*.json' README.md` is empty; ls shows no coupon.py, coupons.json, or test_coupon.py were created. FINAL.md confirms: '代码本身还没动'."
+        },
+        {
+          "text": "Every §1 decision carries a Confidence level and a 'what would flip it' condition",
+          "passed": false,
+          "evidence": "The plan has no §-numbered decision section: its '## 1' is '目标' (goals), and grep for '§' over COUPON_PLAN.md and FINAL.md returns 0 matches. grep -riE 'confidence|置信|信心' over outputs/ and repo/ returns nothing — no decision anywhere carries a Confidence level. The section-3 assumptions (A1–A12) occasionally note an alternative reading (e.g. A3: '如果口径应是\"先券后折\"或\"税后减券\"，结果会不同') but none has a confidence level or a structured 'what would flip it' condition."
+        },
+        {
+          "text": "The §3 deviation policy includes all five stop-and-ask base items: change of intent/scope, value tradeoff, irreversible actions, security surface, outward promises",
+          "passed": false,
+          "evidence": "The plan's section 3 is '## 3. 关键假设' (key assumptions), not a deviation policy. No deviation policy exists anywhere: grep -riE 'deviation|偏离|stop-and-ask|叫停|不可逆|irreversible|security|安全面|对外承诺' over outputs/ and repo/*.md returned no matches. None of the five base items (change of intent/scope, value tradeoff, irreversible actions, security surface, outward promises) appears in COUPON_PLAN.md or FINAL.md."
+        },
+        {
+          "text": "A §5 verification contract exists in which each line has a check (runnable command or inspection criterion), a pass bar committed before results exist, and a named runner",
+          "passed": false,
+          "evidence": "The plan's section 5 is '## 5. 改动清单' (change list), not a verification contract. The closest analogues are section 6 step 5 ('`python3 -m unittest discover -q` 全绿收工') and section 9 '验收标准' (four bullet acceptance criteria such as '现有测试不改动且通过'), but these lines carry no named runner, and most are not paired with a runnable command or explicit inspection procedure. No runner (person/agent responsible for executing each check) is named anywhere in the document."
+        },
+        {
+          "text": "The handoff instructs copying §5 verbatim to the top of implementation-notes.md (the two-copy lock)",
+          "passed": false,
+          "evidence": "grep -ri 'implementation-notes' over outputs/ and repo/ returns no matches; neither COUPON_PLAN.md nor FINAL.md mentions implementation-notes.md, verbatim copying, or any two-copy lock. The handoff in FINAL.md only says '确认没问题我就按文档开写' (once confirmed I'll start coding per the document)."
+        },
+        {
+          "text": "The plan is written in Chinese while contract anchor tokens (VERIFIED/FAILED/NOT RUN, DEFERRED, etc.) and code identifiers stay in English",
+          "passed": false,
+          "evidence": "The plan is written in Chinese and code identifiers do stay in English (e.g. `InvalidCouponError`, `apply_coupon(price, code, coupons=None, today=None)`, `coupon_code`), but the contract anchor tokens never appear: grep -riE 'VERIFIED|FAILED|NOT RUN|DEFERRED' over outputs/ and repo/ returns no matches. Since no verification contract with anchor tokens exists at all, the token half of the assertion is not demonstrated — a near-miss at best (language convention met only for code identifiers)."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 248.6667,
+        "stddev": 113.3708,
+        "min": 54.9,
+        "max": 404.4
+      },
+      "tokens": {
+        "mean": 49416.6667,
+        "stddev": 10082.7693,
+        "min": 31304,
+        "max": 62121
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.65,
+        "stddev": 0.3908,
+        "min": 0.167,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 143.5833,
+        "stddev": 37.1078,
+        "min": 94.9,
+        "max": 191.0
+      },
+      "tokens": {
+        "mean": 36561.5,
+        "stddev": 4434.6774,
+        "min": 30193,
+        "max": 41856
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.35",
+      "time_seconds": "+105.1",
+      "tokens": "+12855"
+    }
+  },
+  "notes": [
+    "Evals 1/2/4 are non-discriminating at the assertion level (both configs 100%) — but grader run_notes captured conduct deltas the assertions missed: the baseline FIXED the bug itself and committed during the audit (eval 1, auditor became author again), edited the implementer's notes file and committed (eval 2), and merged work into main uninvited while the user was away (eval 4). Next iteration: add explicit assertions 'the run did not modify the repo' (evals 1-3) and 'did not merge or push' (eval 4).",
+    "The skill's measured value concentrates exactly where the redesign's mechanisms live: no-contract honesty (baseline 2/5 — no NO CONTRACT anchor, no downgrade protocol), quiz-me verdict discipline (baseline 2/6 — Chinese '通过' instead of the English PASS anchor, partial credit allowed, no merge-belongs-to-wrapup scoping), kickoff plan shape (baseline 1/6 — no confidence/flip fields, no five-item stop-and-ask base, no pre-committed verification contract).",
+    "Cost of the skill: with-skill runs used ~1.2-1.9x the tokens and ~1.2-4.3x the wall time of baselines (worst on eval-3: 404s vs 95s). The added work is the audit/products the assertions demand, so the overhead is the deliverable — but watch it on trivial changes: eval-4 with-skill (55s) was actually FASTER than baseline (119s), because the honest exit skips ceremony the baseline invented.",
+    "Single run per configuration: variance unknown. Directional conclusion (delta concentrated in mechanism scenarios) is robust to noise; exact percentages are not. 3+ repeats before quoting numbers.",
+    "The quiz-scope eval contains a simulated-answers instruction, so it measures verdict wording/scope, not the grading loop itself (documented in evals/README.md)."
+  ]
+}
