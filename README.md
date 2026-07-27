@@ -203,10 +203,14 @@ Windows: `.\install.ps1 -Rules D:\your\project`.
 
 ## Multilingual
 
-Instructions stay in English (best model adherence), but every skill requires
-user-facing output — briefings, questions, quizzes, verdicts — **in the language you're
-speaking**. Triggering works in any language via semantic matching; 中文 trigger words
-(开工 / 收工 / 考考我) are built into the descriptions.
+Instructions are written in Chinese (the project's home language); verdict anchor
+tokens (VERIFIED / FAILED / PASS / NOT YET / DEFERRED …) and code identifiers stay in
+English — they are the cross-language trust anchors that downstream artifacts search
+for. Every skill requires user-facing output — briefings, questions, quizzes,
+verdicts — **in the language you're speaking**, so the skills work unchanged for
+non-Chinese users. Triggering works in any language via semantic matching; trigger
+words in both languages (开工 / kickoff, 收工 / wrapup, 考考我 / quiz me) are built
+into the descriptions.
 
 ## Design principles
 

@@ -1,5 +1,5 @@
-## Finding your unknowns
+## 找到你的未知
 
-- When executing a non-trivial plan, keep an `implementation-notes.md`: log decisions as you go; when a surprise forces deviating from the plan, pick the conservative option, log it under "Deviations", and keep going. Five things always stop and ask instead, at any level of trust: changes of intent, value tradeoffs, irreversible actions, security surface, and outward promises.
-- When the user says a previous attempt came back wrong and they don't know why, suggest the `kickoff` skill to find their unknowns before retrying.
-- Before merging a large change the user hasn't reviewed, suggest the `wrapup` skill (verify + explain + spot-check).
+- 执行非平凡计划时，维护一份 `implementation-notes.md`：决策随手记；当意外迫使偏离计划时，选保守的选项，记在 "Deviations" 下，继续干。五件事在任何信任水平下都停下来问而不是自行决定：意图变更、价值权衡、不可逆操作、安全面、对外承诺。
+- 当用户说上一次尝试出了错、但不知道为什么时，建议先用 `kickoff` skill 找到他们的未知再重试。
+- 在合并一个用户没有亲自审阅过的大改动之前，建议用 `wrapup` skill（验证 + 讲解 + 抽查）。

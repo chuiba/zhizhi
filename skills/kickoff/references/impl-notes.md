@@ -1,24 +1,22 @@
-# Implementation Notes
+# 实现笔记（Implementation Notes）
 
-No matter how much planning happened, unknown unknowns lurk in the code. Notes turn them
-from silent improvisation into a record. Embed these instructions in the plan's handoff
-so the implementing session follows them.
+无论计划做得多足，代码里总潜伏着未知的未知。笔记把它们从静默的即兴发挥变成
+一份记录。把这些指令嵌进计划的交接节，让实现会话照着做。
 
-**Language:** headings in the template below stay in English — wrapup locates them by
-name. Write the entries themselves in the user's language; code identifiers, file
-paths, and the evidence tokens RUN / NOT RUN / FAILED stay in English.
+**Language:** 下面模板里的标题保持英文——wrapup 按名字定位它们。条目本身用
+用户的语言写；代码标识符、文件路径与证据词 RUN / NOT RUN / FAILED 保持英文。
 
-## Setup
+## 设置
 
-At the start of implementation, create `implementation-notes.md` in the repo root (or
-`docs/` if the project keeps working documents there):
+实现开始时，在仓库根目录创建 `implementation-notes.md`（项目把工作文档放
+`docs/` 就放那里）：
 
 ```markdown
-# Implementation notes — <task name>
-Plan: <link/path to the plan>
+# Implementation notes — <任务名>
+Plan: <计划的链接/路径>
 
 ## Contract
-<verbatim copy of the plan's §5 — the audit compares this against the plan's copy>
+<一字不差复制计划的 §5——审计会拿它与计划的副本比对>
 
 ## Decisions
 ## Deviations
@@ -28,49 +26,41 @@ Plan: <link/path to the plan>
 ## Questions for review
 ```
 
-The Contract section is copied **verbatim** from the plan, never paraphrased — the two
-copies are the lock (see plan.md's handoff). No plan §5? Omit Contract, Amendments, and
-Verification evidence; the rest still applies.
+Contract 一节从计划**一字不差**复制，绝不改写——两份副本就是锁（见 plan.md 的
+交接节）。计划没有 §5？省略 Contract、Amendments、Verification evidence；其余
+照旧。
 
-## Rules during implementation
+## 实现期间的规则
 
-1. **Log as you go, not at the end.** An entry written two hours later loses the reason.
-2. Every entry gets a file/line reference where applicable.
-3. **On an edge case that forces deviating from the plan: pick the conservative option,
-   log it under Deviations, keep going.** Conservative = reversible, minimal blast
-   radius, closest to the plan's intent. Don't stall the task on a judgment call the
-   notes can carry to review.
-4. Stop and ask only for what the plan's deviation policy reserved — its five-item base
-   (intent, value tradeoffs, irreversible actions, security surface, outward promises)
-   plus the task-specific list — or a discovery that invalidates the plan's premise.
-5. **Re-diagnosis trigger:** when the third entry lands under Deviations or Amendments,
-   or a single Surprise contradicts one of the plan's premises, stop patching. Say: "the
-   map has drifted from the territory — recommend re-running kickoff on the affected
-   area before continuing." A plan whose premises broke doesn't need more deviations
-   logged against it; it needs a new diagnosis.
-6. **The recorder does not judge.** For each contract line marked implementer-run: log
-   the command, where its output lives, and RUN / NOT RUN / FAILED under Verification
-   evidence — never the word "passes"; the audit judges evidence against the bar. Keep
-   raw output inline only for checks that can't be cheaply re-run later (time-dependent,
-   destructive, external systems). A NOT RUN logged honestly is worth more than a
-   "passes" nobody can audit.
-7. **When a contract line itself is wrong** — its bar rests on a falsified premise, its
-   command can't exist here — don't game the check and don't silently skip it. File an
-   entry under Amendments (old line / new line / evidence why) and keep working against
-   the **stricter** of the two readings; the human countersigns at wrapup. The third
-   amendment is the re-diagnosis trigger (rule 5), not a fourth entry.
+1. **随手记，不要最后补。**两小时后补写的条目丢掉了理由。
+2. 每条能带文件/行号引用的都带上。
+3. **边缘情况迫使偏离计划时：选保守的选项，记在 Deviations 下，继续干。**
+   保守 = 可逆、爆炸半径最小、离计划意图最近。不要为一个笔记能带去评审的判断
+   卡住任务。
+4. 只为计划偏差策略保留的事项停下来问——它的五项底座（意图、价值权衡、不可逆
+   操作、安全面、对外承诺）加任务特有清单——或一个推翻计划前提的发现。
+5. **重新诊断触发器：**当第三条记录落进 Deviations 或 Amendments，或单个
+   Surprise 与计划的某个前提相矛盾时，停止打补丁。说："地图已经偏离领地——
+   建议先对受影响的区域重跑 kickoff 再继续。"前提碎了的计划不需要更多偏差记录
+   在案；它需要一次新的诊断。
+6. **记录者不判定。**每条标为实现者跑的契约行：在 Verification evidence 下记
+   命令、输出放在哪、以及 RUN / NOT RUN / FAILED——绝不写"通过"这个词；由审计
+   对照通过线判定证据。原始输出只为不能便宜重跑的检查（依赖时间的、破坏性的、
+   外部系统的）保留在行内。一条诚实记下的 NOT RUN，胜过一句没人能审计的
+   "通过"。
+7. **当契约行本身错了**——它的通过线建立在被证伪的前提上、它的命令在这里不
+   可能存在——不作弊绕过，也不悄悄跳过。在 Amendments 下立一条（旧行 / 新行 /
+   为什么的证据），并按两种读法中**更严**的那种继续干；人类在 wrapup 时会签。
+   第三个修正案就是重新诊断触发器（规则 5），不是第四条记录。
 
-What goes where: **Decisions** — choices the plan left open, and what you picked.
-**Deviations** — what the plan said, what you did, why, and the alternative.
-**Amendments** — contract lines that turned out wrong, with evidence.
-**Surprises** — hidden coupling, dead code that isn't, tests asserting the wrong thing.
-**Verification evidence** — command, output location, RUN / NOT RUN / FAILED.
-**Questions for review** — anything needing human judgment.
+什么放哪里：**Decisions**——计划留白的选择，你选了什么。**Deviations**——计划
+说什么、你做了什么、为什么、备选是什么。**Amendments**——被证明有错的契约行，
+附证据。**Surprises**——隐藏耦合、其实没死的死代码、断言错了的测试。
+**Verification evidence**——命令、输出位置、RUN / NOT RUN / FAILED。
+**Questions for review**——一切需要人类判断的。
 
-## At the end of the session
+## 会话结束时
 
-Summarize at the top: what shipped versus what the plan promised, three sentences max.
-Point at the two or three entries most worth attention. The summary points at evidence;
-it never contains a correctness verdict — "contract lines run, outputs under
-Verification evidence" is the recorder's ceiling, and "it works" belongs to the audit.
-The wrapup skill consumes this file.
+在顶部总结：交付了什么对比计划承诺了什么，最多三句。指出最值得注意的两三条
+记录。总结指向证据；它绝不包含正确性判定——"契约行已跑，输出在 Verification
+evidence 下"是记录者的天花板，"它工作"属于审计。wrapup skill 消费这份文件。

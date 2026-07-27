@@ -1,66 +1,59 @@
-# Premise Challenge
+# 前提挑战（Premise Challenge）
 
-The unknowns framework has a hidden assumption: that your "knowns" are true. The most
-expensive failures rarely come from ignorance — they come from **false confidence**:
-"sessions are stored in Redis" (migrated away six months ago), "nothing else calls this
-endpoint" (a cron job does). This technique falsifies what the user — and you — treat
-as fact, before anything gets built on top of it.
+未知框架有个隐藏假设：你的"已知"是真的。最贵的失败很少来自无知——来自**虚假
+的确信**："会话存在 Redis 里"（半年前就迁走了）、"没有别的地方调这个端点"
+（有个 cron 任务在调）。这个技术在任何东西盖上去之前，证伪用户——和你——当作
+事实的东西。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, PASS / NOT YET, notes headings) stay in
-English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（CONFIRMED / FALSE / UNVERIFIABLE、
+PASS / NOT YET、笔记标题）保持英文。
 
-## 1. Harvest the premises
+## 1. 收割前提
 
-Collect every assertion being treated as fact, from three sources:
+从四个来源收集所有被当作事实的断言：
 
-- **The user's statements** — anything phrased as certainty about the territory:
-  "it's stored in X", "this is only used by Y", "we can't change Z"
-- **Your own inherited assumptions** — industry defaults you're silently applying that
-  this codebase may not follow
-- **Constraints stated as immovable** — "we must keep X" sometimes describes a decision
-  from two years ago, not a current requirement
-- **Secondhand verdicts** — revert messages, teammates' failure reports, CI results
-  treated as fact without anyone having read the actual failures
+- **用户的陈述**——对领地以确定语气说出的一切："存在 X 里"、"只有 Y 在用
+  这个"、"Z 我们不能动"
+- **你自己继承的假设**——你在静默套用、而这个代码库未必遵循的行业默认
+- **被说成不可动摇的约束**——"必须保留 X"有时描述的是两年前的一个决定，不是
+  当前的要求
+- **二手判词**——回滚信息、同事的失败报告、被当作事实却没人读过实际失败的 CI
+  结果
 
-## 2. Rank, then verify the dangerous ones
+## 2. 排序，然后验证危险的
 
-Rank by **damage-if-wrong × cheapness-to-check**. A premise that's cheap to verify and
-catastrophic if false gets checked first. Time-box the pass; don't audit trivia whose
-falsity wouldn't change any decision.
+按**错了的代价 × 检查的便宜程度**排序。便宜可查、错了灾难的前提最先查。给这
+一遍定时间盒；不要审计那些错了也不改变任何决策的琐碎。
 
-Verify against the territory, not by asking the user to re-confirm: read the code, run
-the query, check the migration history, grep for callers. Before any verification run,
-check for uncommitted changes — evidence gathered on a dirty tree is evidence about the
-wrong territory.
+对照领地验证，不是让用户再确认一遍：读代码、跑查询、查迁移历史、grep 调用方。
+任何验证运行之前，先查未提交的改动——在脏树上采的证据是关于错误领地的证据。
 
-If part of the territory is unreachable (production systems, third-party services),
-hand the user the exact command or query to run and treat the pasted output as
-territory evidence — what's banned is asking them to re-confirm a belief, not to fetch
-a fact. Policy constraints ("no SaaS") can't be verified in code at all: route them to
-the interview as one question — current policy, or a past decision?
+领地有一部分够不到时（生产系统、第三方服务），把确切的命令或查询交给用户，
+贴回来的输出当作领地证据——被禁止的是让他们再确认一个信念，不是让他们取一个
+事实。政策约束（"不用 SaaS"）在代码里根本无法验证：作为一个问题转给采访——
+是现行政策，还是过去的决定？
 
-## 3. Report the verdicts
+## 3. 报告判定
 
-One row per premise:
+每个前提一行：
 
-| Premise | Verdict | Evidence | If false, it changes… |
+| 前提 | 判定 | 证据 | 若不实，改变…… |
 |---|---|---|---|
-| "sessions live in Redis" | **FALSE** | `src/session/store.ts:12` — cookie store since #841 | the whole SSO token plan |
-| "only mobile calls /v2/sync" | CONFIRMED | grep across repos, API gateway logs | — |
-| "peak is ~200 rps" | UNVERIFIABLE | no metrics access | carry into plan as low-confidence assumption |
+| "会话存在 Redis 里" | **FALSE** | `src/session/store.ts:12`——#841 起就是 cookie 存储 | 整个 SSO token 方案 |
+| "只有移动端调 /v2/sync" | CONFIRMED | 跨仓库 grep、API 网关日志 | — |
+| "峰值约 200 rps" | UNVERIFIABLE | 没有指标权限 | 以低置信假设带进计划 |
 
-- **CONFIRMED** needs evidence, not vibes — cite the file, the query, the log.
-- **FALSE** premises get surfaced immediately and loudly. If one invalidates the task's
-  framing, say so before any other work continues — that's this technique's best outcome.
-- **UNVERIFIABLE** premises don't get silently trusted: they move into the plan's
-  assumptions section with low confidence and an explicit "what would flip it".
-- Verdict tokens stay in English caps in every language — later artifacts search for
-  them. Gloss on first use for a non-English user: FALSE（不成立）.
+- **CONFIRMED** 要证据，不要感觉——引文件、引查询、引日志。
+- **FALSE** 的前提立刻、大声地亮出来。若它推翻任务的框架本身，先说这个，别的
+  工作全部暂停——那是这个技术最好的结果。
+- **UNVERIFIABLE** 的前提不被静默信任：进计划的假设节，低置信度，带明确的
+  "什么会翻转它"。
+- 判定词在任何语言里都保持英文大写——后续工件按它们检索。对非英语用户首次
+  出现时加注：FALSE（不成立）。
 
-## Guardrails
+## 护栏
 
-- Challenge premises whose falsity would change decisions; skip pedantry.
-- Your own confidence is in scope: if you catch yourself about to write "obviously" or
-  "typically", that sentence probably contains an unverified premise.
+- 挑战那些不实会改变决策的前提；跳过抬杠。
+- 你自己的确信也在射程内：发现自己要写"显然"或"通常"时，那句话里八成有一个
+  未验证的前提。

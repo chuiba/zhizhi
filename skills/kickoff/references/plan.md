@@ -1,107 +1,90 @@
-# Unknowns-First Implementation Plan
+# Unknowns-First 实现计划
 
-A plan's job is not to list steps — it's to put the user's review time where decisions
-might actually flip. Lead with what they're most likely to tweak; bury what they'd
-rubber-stamp.
+计划的职责不是罗列步骤——是把用户的审阅时间放在决策真可能翻转的地方。把他们
+最可能微调的放最前，把他们会盖章走过场的埋最后。
 
-Fold in whatever this kickoff produced: criteria list, decision log, blindspot briefing,
-semantics checklist.
+把这次 kickoff 产出的东西都折进来：标准清单、决策日志、盲区简报、语义清单。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, VERIFIED / FAILED / NOT RUN, DEFERRED,
-AMENDMENT PENDING, PASS / NOT YET, notes headings) stay in English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（CONFIRMED / FALSE / UNVERIFIABLE、
+VERIFIED / FAILED / NOT RUN、DEFERRED、AMENDMENT PENDING、PASS / NOT YET、笔记
+标题）保持英文。
 
-## Write the plan in this exact order
+## 按这个确切顺序写计划
 
-### 1. Decisions you'll most likely tweak (top of the document)
+### 1. 你最可能微调的决策（文档最顶部）
 
-Data model changes, new type interfaces, API shapes, anything user-facing. For each:
+数据模型变更、新类型接口、API 形状、一切用户可见的东西。每项写：
 
-- The decision, concretely (show the actual schema / interface / flow, not a description)
-- **Confidence: high / medium / low**
-- **What would flip it** — the specific evidence or answer that would change the decision
+- 决策本身，写具体（给出真实的 schema / 接口 / 流程，不是描述）
+- **置信度：high / medium / low**
+- **什么会翻转它**——会改变这个决策的具体证据或答案
 
-This section is the review surface. Readable in five minutes.
+这一节是审阅面。五分钟内读得完。
 
-For diagnostic tasks ("why does X keep failing?"), this section holds **ranked
-hypotheses** instead — each with confidence and the cheapest experiment that would
-flip it.
+诊断类任务（"为什么 X 总是失败？"）里，这一节放**排序后的假设**——每条带
+置信度和能翻转它的最便宜实验。
 
-### 2. Assumptions
+### 2. 假设
 
-Everything taken as given, each with confidence and source (user said it / found in
-code / industry default). Industry-default assumptions get flagged loudest — they're the
-ones most likely to be wrong for this codebase.
+所有被当作给定的东西，每条带置信度和来源（用户说的 / 代码里查到的 / 行业默认）。
+行业默认的假设标得最响——它们最可能不适用于这个代码库。
 
-### 3. Deviation policy
+### 3. 偏差策略
 
-Pre-authorize the implementer:
+预先给实现者授权：
 
-- **When an edge case forces a deviation: pick the conservative option, log it, keep
-  going.** Define "conservative" for this task explicitly.
-- List what must **stop and ask** instead. Five items are the permanent base — they
-  belong to the human at any level of trust and are never delegated: **a change of
-  intent or scope**, **a value tradeoff** (what counts as better), **irreversible
-  actions** (destructive migrations, data deletion), **security surface**, and
-  **outward promises** (API contracts, commitments to people outside the task). Add
-  task-specific items on top; never remove from the base. A discovery that invalidates
-  the plan's premise also stops.
-- For inherently destructive work (production migrations, data deletion), invert the
-  default: enumerate the few places where keep-going is safe; everything else stops
-  and asks.
-- **Contract amendments:** when a §5 line itself turns out wrong — its bar rests on a
-  premise the territory falsified, its command cannot exist here — the implementer
-  neither games the check nor silently skips it. They file a proposed amendment in the
-  notes (old line / new line / evidence) and keep working against the **stricter** of
-  the two readings; the human countersigns at wrapup. A third amendment means the
-  contract's premises broke — that is the re-diagnosis trigger, not a fourth amendment.
+- **边缘情况迫使偏离时：选保守的选项，记下来，继续干。**为这个任务显式定义
+  什么算"保守"。
+- 列出必须**停下来问**的例外。五项是永久底座——它们在任何信任水平下都属于
+  人类，永不下放：**意图或范围的变更**、**价值权衡**（什么算更好）、**不可逆
+  操作**（破坏性迁移、数据删除）、**安全面**、**对外承诺**（API 契约、对任务
+  之外的人的承诺）。任务特有的往上加；底座绝不往下减。推翻计划前提的发现同样
+  要停。
+- 本质上破坏性的工作（生产迁移、数据删除）把默认反过来：枚举少数几个继续干是
+  安全的地方；其余一切停下来问。
+- **契约修正案：**当 §5 的某一行本身错了——它的通过线建立在被领地证伪的前提
+  上、它的命令在这里不可能存在——实现者既不作弊绕过检查，也不悄悄跳过。在
+  笔记里提交一份修正案提案（旧行 / 新行 / 证据），并按两种读法中**更严**的
+  那种继续干；人类在 wrapup 时会签。第三个修正案意味着契约的前提碎了——那是
+  重新诊断的触发器，不是第四个修正案。
 
-### 4. Mechanical work (bottom)
+### 4. 机械性工作（最底部）
 
-Refactoring, plumbing, boilerplate. One line each. Mark the section "low review value —
-trust the implementer."
+重构、管线、样板。每项一行。给这节标注"低审阅价值——信任实现者"。
 
-### 5. Verification contract
+### 5. 验证契约（verification contract）
 
-The correctness contract — wrapup's audit executes this section, so write it for a
-reader with no memory of this plan. One line per "it works" claim, each with:
+正确性契约——wrapup 的审计执行这一节，所以要写给一个对这份计划毫无记忆的读者。
+每条"它工作"的声明一行，各带：
 
-- **The check.** Either **runnable** — the exact command, against real data where
-  possible — or **inspection** — the criterion, where to look, and who confirms — for
-  deliverables that can't be executed (a runbook, a design doc). Never invent a fake
-  runnable check for a document.
-- **The pass bar, committed now.** Decided before any results exist — the spike rule
-  from brainstorm.md, promoted to the whole task. A bar decided after seeing output
-  gets shaped by the output.
-- **Who runs it.** The implementer (runs it, records raw evidence), the audit (re-runs
-  and judges), or a named human for territory only they can reach.
+- **检查本身。**要么**可运行**——确切命令，尽可能对真实数据——要么**检视**——
+  判据、去哪看、谁确认——用于不能执行的交付物（一份手册、一份设计文档）。绝不
+  为文档发明假的可运行检查。
+- **通过线，现在就承诺。**在任何结果存在之前定下——brainstorm.md 的试探规则，
+  升格到整个任务。看了输出再定的线会被输出塑形。
+- **谁来跑。**实现者（跑它、记录原始证据）、审计（重跑并判定）、或某个点名的
+  人类——用于只有他们能到达的领地。
 
-Scale: roughly one line per §1 decision plus one smoke check — about five lines, not
-twenty. A mechanical-only plan gets a one-line contract and no ceremony around it. The
-boundary the contract enforces: **the author of a change is never the author of its
-verdict** — the implementer records evidence; the audit judges it against the bar.
+规模：大约 §1 每个决策一行，加一条冒烟检查——五行上下，不是二十行。纯机械的
+计划配一行契约，不搞仪式。契约强制执行的边界：**改动的作者永远不是其判定的
+作者**——实现者记录证据；审计对照通过线判定证据。
 
-## Review loop
+## 审阅循环
 
-Walk the user through **section 1 and the contract's pass bars — nothing else**, in one
-pass. Adjust until they stop tweaking. Their approval locks the contract: after this,
-changing a §5 line is an amendment (see §3), not an edit. Don't burn their attention on
-the mechanical section.
+带用户走**第 1 节和契约的通过线——别的都不走**，一轮过完。调到他们不再动手改
+为止。他们的批准锁定契约：此后改任何 §5 行都是修正案（见 §3），不是编辑。不要
+把他们的注意力烧在机械节上。
 
-## Handoff
+## 交接
 
-Recommend executing in a **fresh session**: write the plan and kickoff artifacts to
-stable repo paths first, then pass them along with the implementation-notes setup (see
-`impl-notes.md`) so deviations get logged instead of silently improvised. The setup
-copies §5 **verbatim** to the top of `implementation-notes.md` — two copies are the
-lock: wrapup's audit compares them, and divergence without a logged amendment is a
-finding. (This deters drift, not adversaries — a session that controls the disk can
-rewrite both copies. Honest drift is the common failure, and it's the one this
-catches.) Scale the handoff to the plan — if the mechanical section is essentially the
-whole plan, skip the fresh session and the notes file. If humans, not an agent session,
-will execute (a prod cutover, an ops runbook), replace the fresh-session/notes
-instructions with a named log owner and the same Decisions/Deviations/Surprises
-checklist inside the document; §5 lines they run after handoff name their runner and
-due moment, and the audit marks them DEFERRED rather than pretending to run them. What
-the execution learns becomes the map for next time.
+建议在**新会话**里执行：先把计划和 kickoff 工件写到仓库里稳定的路径，连同实现
+笔记的设置（见 `impl-notes.md`）一起传过去，让偏差被记录而不是被静默即兴。设置
+会把 §5 **一字不差**地复制到 `implementation-notes.md` 顶部——两份副本就是锁：
+wrapup 的审计比对它们，没有对应修正案记录的分歧本身就是一个发现。（这防的是
+漂移，不是对手——控制磁盘的会话可以两份一起改。诚实的漂移才是常见故障，而它
+抓得住。）交接的规模跟着计划走——机械节基本就是整份计划时，跳过新会话和笔记
+文件。如果执行者是人而不是 agent 会话（生产切换、运维手册），把新会话/笔记
+指令换成一个点名的日志负责人和文档内同样的 Decisions/Deviations/Surprises
+清单；交接后才由他们运行的 §5 行写明运行者和到期时刻，审计将其标为 DEFERRED
+而不是假装跑过。执行学到的东西成为下一次的地图。

@@ -1,114 +1,99 @@
 ---
 name: quiz-me
-description: Quiz-me (考考我) — after a large change, or any change the user didn't author themselves (AI-written code), generates a report explaining the context, intuition, and mechanics of what changed — then quizzes the user on it and grades the answers strictly, ending in an explicit understanding verdict (PASS / NOT YET). Understanding is one axis only — merge-worthiness belongs to wrapup's verification audit. Use when the user says "quiz me", "考考我", "测测我", "我不放心这次改动", "do I actually understand this change", "explain what happened then test me", or after a long working session before merge.
+description: Quiz-me（考考我）——大改动之后，或任何不是用户亲手写的改动（AI 写的代码）之后，生成一份讲清上下文、直觉与机制的报告，然后就报告内容测验用户并严格评分，以明确的理解判定收尾（PASS / NOT YET）。理解只是一条轴——可否合并归 wrapup 的验证审计管。当用户说 "quiz me"、"考考我"、"测测我"、"我不放心这次改动"、"do I actually understand this change"、"讲讲发生了什么然后考我"，或长工作会话结束后、合并之前使用。
 ---
 
-# Quiz Me
+# Quiz Me（考考我）
 
-After a long session, more happened than the user realizes. Reading diffs gives only a
-light understanding, because much of the new behavior depends on **existing code paths
-the diff never shows**. This skill closes that gap: explain, then verify the explanation
-landed. It measures one axis only — whether the user understands the change. Whether
-the change *works* is wrapup's verification audit's question; a user who shouldn't
-merge what they can't stand behind also shouldn't merge what nobody verified.
+一段长会话之后，发生的事比用户以为的多。只读 diff 得到的理解很浅，因为新行为
+的很大一部分取决于 **diff 从不显示的既有代码路径**。这个 skill 补上这个落差：
+先讲解，再验证讲解真的落地了。它只测一条轴——用户是否理解这次改动。改动*工作
+与否*是 wrapup 验证审计的问题；不该合并自己不能背书之物的用户，同样不该合并
+没人验证过之物。
 
-**Language:** write the report, quiz questions, and verdicts in the language the user is
-speaking. The verdict keywords PASS / NOT YET stay in English in every language — they
-are the trust anchor. File names and code identifiers stay in English.
+**Language:** 报告、测验题、判定用用户正在说的语言书写。判定关键词 PASS /
+NOT YET 在任何语言里都保持英文——它们是信任的锚点。文件名与代码标识符保持
+英文。
 
-## Step 1 — Scope what "the change" really is
+## 第 1 步——界定"这次改动"到底是什么
 
-Don't stop at the diff:
+不要停在 diff：
 
-- The diff itself
-- The existing code paths the new code calls into or is called from
-- Behavior that changed *without its code changing* (a config default now taking
-  effect, a caller now hitting a different branch)
-- What the change relies on continuing to be true (invariants, ordering, formats)
+- diff 本身
+- 新代码调用的、以及调用新代码的既有代码路径
+- *代码没变但行为变了*的地方（一个配置默认值开始生效、一个调用方开始走到不同
+  分支）
+- 改动依赖什么持续为真（不变量、顺序、格式）
 
-## Step 2 — Write the report
+## 第 2 步——写报告
 
-Sections, in order:
+小节按此顺序：
 
-1. **Why** — the problem this change solves, one paragraph
-2. **Mental model** — the intuition: how to think about the new behavior in one diagram
-   or metaphor. If the user keeps one idea, it's this one.
-3. **What changed** — a guided walk through the diff, grouped by intent rather than by
-   file
-4. **What it stands on** — the pre-existing code paths and invariants the change depends
-   on; the part diffs never show
-5. **Where it could break** — the inputs, states, or future edits most likely to hurt it
+1. **为什么**——这次改动解决的问题，一段话
+2. **心智模型**——直觉：用一张图或一个比喻说清新行为该怎么想。用户只记住一件
+   事的话，就是它。
+3. **改了什么**——按意图而非按文件分组，带着走一遍 diff
+4. **它站在什么上面**——改动依赖的既有代码路径与不变量；diff 从不显示的部分
+5. **哪里可能坏**——最可能伤到它的输入、状态、未来改动
 
-For small changes, sections may be a sentence or two and Why / What changed may merge —
-but never thin out "What it stands on" or "Where it could break"; they are the point.
+小改动的小节可以只有一两句，"为什么"和"改了什么"可以合并——但绝不削薄
+"它站在什么上面"和"哪里可能坏"；它们是重点所在。
 
-Default to Markdown. If the user asks for HTML (or the change is big enough that
-navigation helps), produce a single self-contained HTML file with the quiz at the bottom.
+默认 Markdown。用户要 HTML（或改动大到需要导航）时，产出单个自包含 HTML 文件，
+测验放底部。
 
-**The report is the answer key, and the key is a map.** Every claim in it must be
-territory-backed — a file/line you actually opened, or output you actually executed
-(tracing and failure-mode answers especially: walk the real code path or run the input
-before asserting what happens). A claim you can only assert goes into "Where it could
-break", and no quiz question may hang on it — a strictly graded quiz keyed to a wrong
-map teaches the error harder. Quiz-me runs without wrapup's audit, so this rule is the
-whole correctness safeguard here: if backing a claim would require running something
-you can't, say so in the report rather than asserting.
+**报告是答案钥匙，而钥匙是一张地图。**其中每条声明都必须有领地背书——一个你
+真的打开过的文件/行号，或你真的执行过的输出（追踪题和失败模式题尤其：断言会
+发生什么之前，先走一遍真实代码路径或跑一遍那个输入）。只能靠断言的声明放进
+"哪里可能坏"，且任何测验题都不得挂在它上面——严格评分的测验配上一张错的地图，
+只会把错误教得更牢。Quiz-me 在没有 wrapup 审计的情况下运行，所以这条规则是
+这里全部的正确性保障：背书一条声明需要运行你运行不了的东西时，在报告里说明，
+而不是径直断言。
 
-Write the report to a file, not only into chat — grading spans multiple turns, and the
-report is the answer key; it must survive context compaction. Put it in the project's
-working-docs home or a gitignored directory in the repo — not a session temp dir
-(grading may resume in a fresh session), and never loose in the source tree.
+把报告写进文件，不要只写进聊天——评分跨多个回合，而报告是答案钥匙；它必须在
+上下文压缩后幸存。放在项目的工作文档目录，或仓库里一个 gitignore 的目录——
+不放会话临时目录（评分可能在新会话续），也绝不散落在源码树里。
 
-## Step 3 — Quiz
+## 第 3 步——测验
 
-3–8 questions at the bottom of the report, scaled to the change's conceptual surface.
-The no-trivia rule below outranks the count: write fewer questions rather than pad. For
-substantial changes include at least one of each; drop a category the change genuinely
-doesn't have rather than invent trivia:
+报告底部 3–8 题，按改动的概念面积伸缩。下面的无废题规则优先于数量：宁可少出，
+不要凑数。实质性改动每类至少一题；改动确实没有的类别就砍掉，而不是发明废题：
 
-- A question about behavior that depends on **pre-existing code** (not visible in diff)
-- A **failure mode**: "what happens if <input/state X>?"
-- A **tracing** question: "a request comes in with Y — walk me through what runs"
-- A **design** question: "why was alternative Z not used?"
+- 一道关于依赖**既有代码**（diff 里看不见）的行为的题
+- 一道**失败模式**题："如果 <输入/状态 X> 会发生什么？"
+- 一道**追踪**题："一个带 Y 的请求进来——带我走一遍会运行什么"
+- 一道**设计**题："为什么没用替代方案 Z？"
 
-Format for low friction — a quiz nobody takes verifies nothing:
+格式要低摩擦——没人做的测验什么也验证不了：
 
-- **Default to multiple choice** (at least two-thirds of the questions), with
-  distractors built from plausible misconceptions, not filler. A user who actually
-  holds the misconception must find its distractor attractive.
-- **At most one short-answer question per three questions** (the tracing question is
-  usually the one), answerable in a handful of keywords or arrows — say so explicitly.
-- **At most one or two prediction items**, where a check is cheap to run: the user
-  states what the system will do for a concrete input, then it is actually run and
-  checked (on a host that can't execute, hand the user the command). Prediction beats
-  recall — but only in small doses; the low-friction format is what makes the quiz get
-  taken at all.
-- Number questions and letter the options so the whole quiz can be answered in one
-  line ("1B 2A 3C"). If the host provides a structured choice UI, use it.
-- No trivia — every question's answer should matter for operating or reviewing this
-  code.
+- **默认选择题**（至少三分之二），干扰项来自像样的误解，不是凑数。真持有那个
+  误解的用户必须觉得对应干扰项有吸引力。
+- **每三题至多一道简答**（追踪题通常就是它），几个关键词或箭头就能答——明说
+  这一点。
+- **至多一两道预测题**，且检查跑起来要便宜：用户说出系统对一个具体输入会做
+  什么，然后真的跑一遍核对（宿主不能执行时，把命令交给用户）。预测胜过复述——
+  但只能小剂量；低摩擦的形式才是测验会被做完的原因。
+- 题目编号、选项标字母，让整套测验能用一行回答（"1B 2A 3C"）。宿主提供结构化
+  选择 UI 就用它。
+- 无废题——每道题的答案都应该对操作或评审这份代码有用。
 
-## Step 4 — Grade strictly
+## 第 4 步——严格评分
 
-- Grade each answer; partial credit is a fail for that question. For short answers,
-  judge the concept, not the prose — terse keyword answers are fine.
-- Attribution runs in two rounds: a **first miss is presumed a clarity defect in the
-  explanation** — re-explain with a file/line reference, no penalty — then ask a
-  **variant** of the question (not the same one — the user can echo, that's not
-  understanding). A miss on the variant is an understanding gap and counts toward NOT
-  YET. The burden of legibility starts on the explainer; it transfers to the reader
-  only after a better explanation failed.
-- Repeat until everything passes — or the user stops. Stopping early is always allowed
-  and always a NOT YET, never a reluctant PASS.
+- 逐题评分；部分正确按错算。简答题判概念，不判文笔——简短的关键词式回答完全
+  可以。
+- 归因走两轮：**第一次答错推定为讲解的清晰度缺陷**——带文件/行号重新讲解，
+  不扣分——然后出一道**变体**（不是原题——用户会复读，复读不是理解）。变体
+  再错才是理解缺口，计入 NOT YET。可读性的举证责任始于讲解者；只有更好的讲解
+  也失败之后，才移交给读者。
+- 重复直到全部通过——或用户喊停。提前停永远允许，且永远是 NOT YET，绝不是
+  一个勉强的 PASS。
 
-End with an explicit verdict:
+以明确的判定收尾：
 
-- **PASS — you understand this change.** Understanding is one axis; merge-worthiness
-  is the other, and it belongs to wrapup's verification audit. If merging is the
-  question, say so in the same breath: run wrapup.
-- **NOT YET — misses on: <topics>. Re-quiz when ready.**
+- **PASS — 你理解这次改动。**理解是一条轴；可否合并是另一条，归 wrapup 的验证
+  审计管。如果用户问的是能不能合并，同一口气里说清楚：去跑 wrapup。
+- **NOT YET — 未过关处：<主题>。准备好了再测。**
 
-Never soften the verdict. The whole value of the skill is that the user can trust a
-PASS — and a PASS that promised less than "safe to merge" is one the user can trust
-further. Everything after the dash is written in the user's language; the PASS / NOT
-YET keywords stay English.
+绝不软化判定。这个 skill 的全部价值在于用户可以信任 PASS——而一个承诺得比
+"可以合并"更少的 PASS，是一个用户可以信得更深的 PASS。破折号之后的一切用用户
+的语言写；PASS / NOT YET 关键词保持英文。

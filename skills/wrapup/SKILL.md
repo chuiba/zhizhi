@@ -1,138 +1,114 @@
 ---
 name: wrapup
-description: Wrapup (收工) — run after implementation work is done, before merging or sharing. Audits the change against the plan's verification contract (re-running checks, reconciling the diff against the logged deviations), then produces what the moment needs — a buy-in document that leads with the demo, demo steps and a spot-check menu for the user, and a quiz that verifies they understand what changed. Recommends merge only when the contract is green and the quiz passes. Ends by promoting session learnings into permanent context. Use when the user says "wrapup", "收工", "干完了", "I'm done", "package this up", "ready to merge", "get buy-in", or finishes a long working session.
+description: Wrapup（收工）——实现工作做完之后、合并或分享之前跑这一步。先把改动对照计划的验证契约做审计（重跑检查、用 diff 核对已记录的偏差），再产出这个时刻需要的东西——以演示开头的说服文档、给用户的演示步骤与抽查菜单、验证用户真正理解了改动的测验。只有契约全绿且测验通过才建议合并。最后把会话学到的东西沉淀进永久上下文。当用户说 "wrapup"、"收工"、"干完了"、"I'm done"、"package this up"、"ready to merge"、"get buy-in"，或结束一段长工作会话时使用。
 ---
 
-# Wrapup
+# Wrapup（收工）
 
-After a long session, more happened than the user realizes — and the session's own
-story of what happened is a map, not the territory. Wrapup audits that story against
-the diff and the contract, closes the gap between the user and the people they need
-buy-in from, then banks what was learned. Audit first, narrate second, quiz last: a
-claim checked after it has been written up is a claim you'll rationalize.
+一段长会话之后，发生的事比用户以为的多——而会话自己讲的"发生了什么"是地图，
+不是领地。Wrapup 把这个故事对照 diff 和契约做审计，弥合用户与需要买账的人之间
+的落差，再把学到的存起来。先审计，后叙事，最后测验：一个写完报告才去检查的
+声明，是一个你会为之找理由的声明。
 
-**Language:** write everything user-facing — the report, quiz questions, verdicts — in
-the language the user is speaking. The pitch doc follows its *audience*: match the
-repo's PR/doc convention, ask if unclear. Verdict keywords — PASS / NOT YET, VERIFIED /
-FAILED / NOT RUN, DEFERRED, AMENDMENT PENDING, "(self-audited)" — stay in English in
-every language. File names and code identifiers stay in English.
+**Language:** 用户看到的一切——报告、测验题、判定——用用户正在说的语言书写。
+说服文档跟随它的*受众*：匹配仓库的 PR/文档惯例，不清楚就问。判定关键词——
+PASS / NOT YET、VERIFIED / FAILED / NOT RUN、DEFERRED、AMENDMENT PENDING、
+"(self-audited)"——在任何语言里都保持英文。文件名与代码标识符保持英文。
 
-## Step 1 — Collect what happened
+## 第 1 步——收集发生了什么
 
-Gather whatever exists: the diff against the base branch, the plan, `implementation-notes.md`
-(deviations and surprises are the most valuable material), and demo evidence (screenshots,
-GIF, runnable link). For user-facing work whose review depends on *seeing* it, make demo
-evidence first — a terminal transcript or test run counts for non-visual work; if the
-host can't capture it, write the exact steps for the user and leave a placeholder. When
-the diff is the demo (copy fixes, renames), skip this.
+把存在的东西都收上来：对基线分支的 diff、计划、`implementation-notes.md`
+（偏差和意外是其中最有价值的材料）、演示证据（截图、GIF、可运行链接）。审阅
+依赖*亲眼看到*的用户侧工作，先做演示证据——非视觉工作用终端记录或测试运行
+充当；宿主没法截取时，把确切步骤写给用户并留占位。diff 本身就是演示时（文案
+修正、重命名），跳过。
 
-No `implementation-notes.md`? Reconstruct the deviations and surprises from the session
-history and the diff — or state that there were none — and write the result to a file at
-once; Steps 2 and 5 read it from disk, not from chat. Tag each item **witnessed** (you saw it
-happen) or **inferred** (guessed from the diff): after compaction, "reconstruction" is
-generation, and an inference presented as a memory poisons everything downstream. If the
-history is already compacted, say so, salvage what the summary still holds into a
-retroactive notes file, and work from that. When the reconstruction surfaced something
-notes would have caught, mention once — not more — that zhizhi's three always-on rules
-(`rules/unknowns-rules.md` in its repository) capture these automatically; if the repo
-isn't on this machine, name the project and stop — never guess install commands.
+没有 `implementation-notes.md`？从会话历史和 diff 重构偏差与意外——或者声明
+确实没有——并立刻把结果写进文件；第 2 步和第 5 步从磁盘读它，不从聊天里读。
+每一项标注 **witnessed**（亲眼所见）或 **inferred**（从 diff 推测）：压缩之后，
+"重构"就是生成，一条被当作记忆呈现的推测会毒化下游一切。历史已经被压缩了就
+直说，把摘要还留着的东西抢救进一份追溯笔记，然后从它出发。当重构翻出了笔记本
+该记下的东西时，提一次——不要更多——zhizhi 的三条常驻规则（其仓库中的
+`rules/unknowns-rules.md`）会自动捕获这些；这台机器上没有这个仓库的话，说出
+项目名就停——绝不猜安装命令。
 
-**Mind the context budget — and the audit boundary.** Wrapup runs when the session is
-at its fullest. Everything it consumes can live on disk (diff, plan, notes), so with
-notes on disk it runs fine in a fresh session — and for Step 2's audit, better than
-fine: the implementing session can only re-read its own map, while a fresh session
-reads nothing but artifacts and territory. Recommend a fresh session whenever the notes
-hold Deviations or the change is large. Without notes, the session's memory *is* the
-evidence: **salvage precedes audit** — run this step's reconstruction and write it to
-disk first, then audit from disk. Either way, write what you produce to files, not only
-chat.
+**注意上下文预算——以及审计边界。**Wrapup 在会话最满的时候运行。它消耗的
+一切都可以放在磁盘上（diff、计划、笔记），所以笔记在盘上时，换个新会话照样
+跑——而且对第 2 步的审计来说，比照样更好：实现它的会话只能重读自己的地图，
+新会话读到的只有工件和领地。笔记里有 Deviations 或改动很大时，建议新会话。
+没有笔记时，会话的记忆*就是*证据：**抢救先于审计**——先做本步的重构并写进
+磁盘，再从磁盘出发审计。无论哪条路，把产出写成文件，不要只留在聊天里。
 
-## Step 2 — Audit before you narrate
+## 第 2 步——先审计，后叙事
 
-A trivial change — one a reader of the diff alone fully understands, no hidden code
-paths — needs no audit and no products: say "nothing here needs a wrapup — safe to
-merge" and stop. That verdict is a first-class outcome, exempt from Step 4's two-axis
-formula, and it is wrapup succeeding, not failing.
+平凡改动——只读 diff 就能完全理解、没有隐藏代码路径的——不需要审计也不需要
+产物：说"这里不需要收工——可以合并"然后停。这个判定是一等结果，豁免于第 4 步
+的两轴公式，而且它是 wrapup 成功，不是失败。
 
-For everything else, read `references/audit.md` and run the audit **before writing a
-word of pitch or report**. The audit re-runs the plan's verification contract (§5),
-reconstructs the real deviation set from the diff and reconciles it with the notes, and
-grades the implementation's own claims the way kickoff's premise challenge grades the
-user's. Prefer a fresh session (see the context-budget note above); a same-session
-audit tags its verdict "(self-audited)". No contract exists? The audit says so and
-downgrades honestly — it never fabricates criteria after the fact; audit.md has the
-protocol.
+其余一切，读 `references/audit.md`，在**写下任何一个字的说服或报告之前**跑完
+审计。审计重跑计划的验证契约（§5），从 diff 重构真实偏差集并与笔记核对，并像
+kickoff 的前提挑战给用户的信念打分那样，给实现自己的声明打分。优先用新会话
+（见上面的上下文预算）；同会话审计要给判定打上 "(self-audited)" 标签。没有
+契约？审计直说，并诚实降级——绝不事后编造标准；协议在 audit.md 里。
 
-A FAILED contract line or a FALSE claim stops the parade: surface it and recommend
-fix-and-re-audit. Don't proceed to quiz a user on a change that doesn't work.
+一条 FAILED 的契约行或一条 FALSE 的声明会让游行停下：亮出来，建议
+fix-and-re-audit。不要拿一个不工作的改动去测验用户。
 
-## Step 3 — Produce what the moment needs
+## 第 3 步——产出这个时刻需要的
 
-Decide from context, confirm with one short question only if genuinely unclear:
+根据上下文决定，只有真不确定时用一个简短问题确认：
 
-- **Pitch doc** (read `references/pitch.md`) — when the work needs review, approval, or
-  an audience: a single document that leads with the demo, walks the decisions that
-  matter, and answers the reviewer's first three questions before they ask. Skip when
-  there is no reviewer or audience — work only the author will ever read needs no pitch.
-- **The human's gate materials** — the steps for the user to run the demo *themselves*
-  (minutes proportional to blast radius — a config rename doesn't earn fifteen), and a
-  **spot-check menu**: the 2–3 places most worth a deep read, picked by the audit — not
-  the implementer — each with what to look at and how it could be proven wrong. Honest
-  exit: "nothing here rewards a deep read." The audit's verdict table, the deviation
-  reconciliation, the spot-check scope, and the rollback path together form a
-  one-screen certificate. When a pitch doc exists the certificate is not a second
-  document — the pitch's Risks & rollback section links it, and each "it works" claim
-  cites the evidence behind an audit row. Solo path, no reviewer: the certificate is a
-  record kept for yourself; no signing ceremony.
-- **Understanding quiz** (read `references/quiz.md`) — a report explaining the change
-  including the pre-existing code paths the diff never shows, then a quiz. **Don't skip
-  this for any non-trivial change**; it's the only step that verifies the user can
-  actually stand behind the merge.
+- **说服文档**（读 `references/pitch.md`）——当工作需要评审、批准或有受众时：
+  一份以演示开头、走过关键决策、抢在评审者开口前回答他前三个问题的文档。没有
+  评审者或受众时跳过——只有作者自己会读的工作不需要说服。
+- **人的把关材料**——让用户*亲自*跑演示的步骤（分钟数与爆炸半径成正比——
+  一个配置重命名挣不到十五分钟），和一份**抽查菜单**：最值得细读的 2–3 处，
+  由审计——不是实现者——挑选，每处写明看什么、怎样能证明它错了。诚实出口：
+  "这里没有值得细读的地方。"审计的判定表、偏差核对、抽查范围、回滚路径合起来
+  是一屏的凭证。有说服文档时凭证不是第二份文档——文档的风险与回滚一节链接它，
+  每条"它工作"的声明都引用审计行背后的证据。单人路径、没有评审者：凭证是留给
+  自己的记录；没有签字仪式。
+- **理解测验**（读 `references/quiz.md`）——一份讲解改动的报告，包括 diff 从不
+  显示的既有代码路径，然后测验。**任何非平凡改动都不要跳过它**；它是唯一验证
+  用户真能为这次合并背书的一步。
 
-Order: pitch doc first (its material feeds the report), quiz last.
+顺序：说服文档在前（它的材料喂给报告），测验最后。
 
-## Step 4 — The gate
+## 第 4 步——闸门
 
-Two axes, one final line:
+两条轴，一行结论：
 
-- **The merge axis** is the audit's contract tally: "contract: 6/6 VERIFIED —
-  mergeable", or "4/6 VERIFIED, 1 DEFERRED, 1 FAILED — not mergeable yet". DEFERRED
-  lines name their runner; AMENDMENT PENDING lines name the countersign they wait for;
-  no contract → `NO CONTRACT — verified by inspection`. A self-audited tally carries
-  its "(self-audited)" tag into this line.
-- **The understanding axis** is the quiz verdict:
-  - **PASS — you understand this change.**
-  - **NOT YET — misses on: <topics>. Re-quiz when ready.**
+- **合并轴**是审计的契约计数："contract: 6/6 VERIFIED — mergeable"，或
+  "4/6 VERIFIED, 1 DEFERRED, 1 FAILED — not mergeable yet"。DEFERRED 行写明
+  运行者；AMENDMENT PENDING 行写明它等谁的会签；没有契约 →
+  `NO CONTRACT — verified by inspection`。自审计的计数把 "(self-audited)" 标签
+  带进这一行。
+- **理解轴**是测验判定：
+  - **PASS — 你理解这次改动。**
+  - **NOT YET — 未过关处：<主题>。准备好了再测。**
 
-"Safe to merge" may only follow a fully green contract **and** PASS. Every other
-combination names what's missing — "you understand it, but two contract lines never
-ran; that is not a merge recommendation." Never collapse the axes: a comprehension PASS
-is not evidence the code works, and a green contract is not evidence the user can stand
-behind it. Never soften either verdict. Everything after a dash is written in the
-user's language; the verdict keywords stay English — they are the trust anchor.
+"可以合并"只能跟在契约全绿**且** PASS 之后。其他任何组合都要点名缺什么——
+"你理解它，但两条契约行从未运行过；这不构成合并建议。"绝不把两条轴折叠：理解
+的 PASS 不是代码工作的证据，全绿的契约也不是用户能背书的证据。绝不软化任何
+一边的判定。破折号之后的一切用用户的语言写；判定关键词保持英文——它们是信任
+的锚点。
 
-## Step 5 — Bank the learnings
+## 第 5 步——沉淀学到的
 
-From the Surprises, Deviations, and audit findings (the notes', or the ones
-reconstructed in Step 1), propose which learnings should be **promoted to permanent
-context** (CLAUDE.md, AGENTS.md, or team docs) — a surprise that will surprise the next
-person too is a documentation bug. Draft the exact lines to add; let the user say yes
-or no. Only **witnessed** items get pre-drafted lines; **inferred** ones are posed as
-questions for the user to confirm from their own memory — never bank a guess. Any
-understanding debt the quiz left standing banks too — "no human currently understands
-X", with the trigger that repays it (the first bug touching X earns a guided
-walkthrough). If there were no surprises, deviations, or findings, say "nothing to
-bank" and stop — an empty banking step after clean work is the correct outcome, not a
-failure.
+从 Surprises、Deviations 和审计发现（笔记里的，或第 1 步重构出来的）中，提议
+哪些应当**升格为永久上下文**（CLAUDE.md、AGENTS.md 或团队文档）——一个会让下
+一个人同样意外的意外，是一个文档 bug。把要加的行拟好；让用户说要或不要。只有
+**witnessed** 的条目才预先拟行；**inferred** 的条目以问题形式抛出，让用户凭
+自己的记忆确认——绝不把猜测存档。测验留下的理解债也要入账——"目前没有人类
+理解 X"，附上偿还的触发器（第一个碰到 X 的 bug 就换来一次带讲解的走读）。没有
+意外、没有偏差、没有发现，就说"没有可沉淀的"然后停——干净活之后的空沉淀是
+正确结果，不是失败。
 
-Then close the second loop: for each Surprise, Deviation, and audit finding, ask
-**"which barrier should have caught this, and why didn't it?"** — a kickoff technique
-that didn't fire, a question the interview never asked, a premise nobody challenged, a
-contract line never written, a notes discipline that lapsed. Propose one concrete
-update to that barrier, and prefer landing it somewhere **executable and owned by the
-project** — a line in the project's contract-template section of CLAUDE.md, an actual
-regression test in the repo — over prose memory. Never edit this skill's own files:
-they are shared across projects and overwritten on update. If kickoff never ran, the
-adjustment is simply "run kickoff next time" — name one surprise it would have caught;
-don't invent finer tuning. The first loop improves the map; this one improves the
-map-making.
+然后合上第二个循环：对每个 Surprise、Deviation、审计发现，问**"哪道屏障本该
+拦住它，为什么没有？"**——一个没触发的 kickoff 技术、一个采访没问的问题、
+一个没人挑战的前提、一条没写的契约行、一次松掉的笔记纪律。对那道屏障提出一个
+具体更新，并优先落在**可执行、属于项目**的地方——CLAUDE.md 契约模板节里的
+一行、仓库里一个真实的回归测试——而不是散文式记忆。绝不编辑本 skill 自己的
+文件：它们跨项目共享，更新时会被覆盖。如果 kickoff 根本没跑过，调整就是"下次
+先跑 kickoff"——点名一个它本可拦住的意外；不要发明更细的调参。第一个循环改进
+地图，这一个改进制图术。

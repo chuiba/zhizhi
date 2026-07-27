@@ -1,56 +1,48 @@
-# Blind Spot Pass
+# 盲区扫描（Blind Spot Pass）
 
-The user is about to work somewhere they can't see clearly. They may not know what
-questions to ask, what good looks like, what historical work exists, or what potholes to
-avoid. Explore the territory for them and hand back a map.
+用户即将在一片自己看不清的地方干活。他们可能不知道该问什么问题、好是什么样、
+有什么历史工作、要避开哪些坑。替他们探一遍领地，交回一张地图。
 
-**This technique teaches; it never implements.**
+**这个技术教人；它从不实现。**
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, PASS / NOT YET, notes headings) stay in
-English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（CONFIRMED / FALSE / UNVERIFIABLE、
+PASS / NOT YET、笔记标题）保持英文。
 
-## 1. Collect the starting point
+## 1. 收集起点
 
-Three things (ask once, briefly, only for what's missing): what they're about to do,
-what they already know, and what decisions they think they'll face. If kickoff Step 1
-already collected this, reuse it — fill at most the single missing item; don't re-ask. The gap between what
-they think the task involves and what it actually involves is exactly what you're hunting.
+三件事（问一次，简短，只问缺的）：他们要做什么、已经知道什么、自认为会面对
+哪些决策。kickoff 第 1 步已经收集过就复用——至多补一个缺项；不要重问。他们
+以为任务涉及什么与任务实际涉及什么之间的落差，正是你要猎的东西。
 
-## 2. Explore the territory
+## 2. 探索领地
 
-For codebase work: the modules they'll touch and what those depend on; conventions this
-area follows that the rest of the codebase doesn't; history (past attempts, reverted
-commits, TODO/FIXME, related PRs); what tests cover and conspicuously don't; hidden
-coupling. For domain work, pull from web search and your own knowledge: the standard
-tooling landscape, published failure modes and post-mortems, the decisions experts
-front-load, and their quality bar. Where territory is unreachable (production systems,
-third parties), the briefing's "questions you didn't know to ask" must include the
-concrete checks the user should run there.
+代码库工作：他们要碰的模块及其依赖；这片区域独有而代码库其他地方不遵循的惯例；
+历史（过往尝试、回滚的提交、TODO/FIXME、相关 PR）；测试覆盖了什么、显眼地没
+覆盖什么；隐藏耦合。领域工作：从网络搜索和你自己的知识里拉——标准工具版图、
+公开的失败模式与事后复盘、专家会前置的决策、以及他们的质量线。领地够不到的
+地方（生产系统、第三方），简报的"你不知道要问的问题"必须包含用户该去那里跑的
+具体检查。
 
-**Budget the exploration.** Breadth first — file names, signatures, commit titles — and
-open whole files only when a signal points there. You're drawing a map, not auditing;
-this session still has an interview and a plan to fit after you. Where the host supports
-subagents, send them exploring and keep only their conclusions.
+**给探索定预算。**先广度——文件名、签名、提交标题——有信号指过去时才打开
+整个文件。你在画地图，不是在审计；这个会话后面还要塞下一场采访和一份计划。
+宿主支持子代理时，派它们去探，只留结论。
 
-## 3. Deliver the briefing
+## 3. 交付简报
 
-Exactly these sections, each tight:
+正是这些小节，每节紧凑：
 
-1. **The territory** — what this area/domain actually is, in the user's terms
-2. **Questions you didn't know to ask** — the heart of the pass; each with why it
-   matters and what the answer changes
-3. **Potholes** — specific traps, with file references or concrete examples
-4. **Prior art** — what already exists that they should reuse or not contradict
-5. **What good looks like** — how an expert judges the result; give them a quality bar
-6. **Vocabulary** — terms they'll need to prompt precisely
+1. **领地**——这个区域/领域实际是什么，用用户的话说
+2. **你不知道要问的问题**——扫描的核心；每条带为什么重要、答案会改变什么
+3. **坑**——具体的陷阱，带文件引用或具体例子
+4. **已有的**——已经存在、他们该复用或不该抵触的东西
+5. **好是什么样**——专家怎么评判结果；给他们一条质量线
+6. **词汇**——他们精确提示所需的术语
 
-A section that would be empty for this user gets one line saying so, not filler.
+对这个用户会是空的小节，用一行说明即可，不要凑数。
 
-## 4. Help them prompt better
+## 4. 帮他们把下一次提示写好
 
-End with **"How to prompt me next"**: their original request rewritten with resolved
-assumptions inline and open questions flagged. Decisions only the user can make go to
-the interview technique next. Skip this section when other techniques are still queued
-in this kickoff — the final handoff subsumes it.
+以**"接下来怎么提示我"**收尾：他们的原始请求，重写后把已解决的假设内联进去、
+把开放问题标出来。只有用户能做的决策交给接下来的采访技术。这次 kickoff 还有
+其他技术排队时跳过本节——最终交接会把它包含进去。

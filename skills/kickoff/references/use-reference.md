@@ -1,56 +1,52 @@
-# Use a Reference
+# 使用参考物（Use a Reference）
 
-Sometimes the user can't describe what they want — but they can point. The best
-reference is **source code**: it carries the edge cases and defaults that a screenshot
-or prose description loses. A reference in a different language still beats a vague spec.
+有时用户描述不出他们要什么——但他们能指。最好的参考物是**源代码**：它携带着
+截图或文字描述会丢掉的边缘情况与默认值。另一种语言写的参考物也胜过一份含糊的
+规格。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, PASS / NOT YET, notes headings) stay in
-English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（CONFIRMED / FALSE / UNVERIFIABLE、
+PASS / NOT YET、笔记标题）保持英文。
 
-## 1. Pin down the reference and the extraction target
+## 1. 钉死参考物和提取目标
 
-Confirm: **where** is the reference (folder, dependency, URL — for a website component,
-read the page's actual markup/CSS/JS, not just how it looks), and **what exactly** to
-extract — behavior (semantics, edge cases), structure (architecture, API shape), or
-appearance (markup, styling)? "All of it" is rarely true; make the user pick the
-load-bearing part.
+确认：参考物**在哪**（目录、依赖、URL——网站组件要读页面的真实 markup/CSS/JS，
+不是只看外观），以及**确切提取什么**——行为（语义、边缘情况）、结构（架构、
+API 形状）、还是外观（标记、样式）？"全都要"很少是真的；让用户挑出承重的
+部分。
 
-If the reference is a closed or minified product (a SaaS demo, a bundled SPA), extract
-**observed behavior** instead: probe it — typos, empty input, ordering, timing — and
-read its public docs; those observations are the source.
+参考物是封闭或压缩过的产品（SaaS demo、打包的 SPA）时，改为提取**观察到的
+行为**：戳它——打错字、空输入、顺序、时序——并读它的公开文档；这些观察就是
+源。
 
-## 2. Read the source properly
+## 2. 好好读源码
 
-The happy path, then every branch off it: error paths, retries, timeouts, limits.
-**Defaults and magic numbers** — they encode the author's hard-won knowledge. The
-configuration surface. Tests, if present — they document intended semantics more
-honestly than the code.
+先快乐路径，然后它岔出去的每条分支：错误路径、重试、超时、限制。**默认值和
+魔法数字**——它们编码着作者的血泪经验。配置面。测试（如果有）——它们比代码
+更诚实地记录着意图中的语义。
 
-## 3. Produce the semantics checklist
+## 3. 产出语义清单
 
-Before writing any code, one row per observed behavior:
+写任何代码之前，每条观察到的行为一行：
 
-| Reference behavior | Plan | Why |
+| 参考物行为 | 打算 | 为什么 |
 |---|---|---|
-| "exponential backoff, base 200ms, jitter ±20%, cap 30s" | keep | core of what user wants |
-| "persists queue to disk" | drop | our client is stateless |
-| "errors returned as Result<T>" | adapt → typed exceptions | idiomatic in our stack |
+| "指数退避，基数 200ms，抖动 ±20%，上限 30s" | keep | 用户想要的核心 |
+| "队列持久化到磁盘" | drop | 我们的客户端无状态 |
+| "错误以 Result<T> 返回" | adapt → 类型化异常 | 在我们的栈里更地道 |
 
-Every row marked **keep / adapt / drop** with a one-line reason. Get the user's
-confirmation — this is where misunderstandings die cheaply.
+每行标 **keep / adapt / drop**，各带一行理由。拿到用户的确认——误解在这里死掉
+最便宜。
 
-**License check:** before carrying over code verbatim, check the reference's license.
-Default to reimplementing semantics in the target stack's idiom.
+**许可证检查：**逐字搬运代码之前，查参考物的许可证。默认在目标栈的惯用法里
+重新实现语义。
 
-## 4. Hand off for verification
+## 4. 交接给验证
 
-During kickoff, stop once the user confirms the checklist — each keep/adapt row becomes
-a verification item in the plan; implementation happens after handoff, never inside
-kickoff. When the implementation lands, each **keep** and **adapt** row must state how
-it is satisfied (test, code reference, or demo). Unverified rows are marked openly, not
-assumed done.
+kickoff 期间，用户确认清单后就停——每条 keep/adapt 行成为计划里的一个验证项；
+实现发生在交接之后，绝不在 kickoff 之内。实现落地时，每条 **keep** 和
+**adapt** 行必须说明它如何被满足（测试、代码引用或演示）。未验证的行公开标出，
+不假设已完成。
 
-If the reference turns out to do something subtly different from what the user believed,
-surface it before implementing — that discovery is the technique working as intended.
+如果参考物实际做的与用户以为的有微妙不同，实现之前先亮出来——这个发现正是
+技术在按设计工作。

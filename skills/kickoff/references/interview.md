@@ -1,54 +1,47 @@
-# Interview
+# 采访（Interview）
 
-Extract the decisions hiding in the user's head — one question at a time, biggest blast
-radius first.
+把藏在用户脑子里的决策取出来——一次一问，爆炸半径最大的先问。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, PASS / NOT YET, notes headings) stay in
-English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（CONFIRMED / FALSE / UNVERIFIABLE、
+PASS / NOT YET、笔记标题）保持英文。
 
-## 1. Prepare (silently)
+## 1. 准备（静默进行）
 
-Build a private list of every ambiguity from the task, plan drafts, criteria, and code.
-Sort by blast radius:
+从任务、计划草稿、标准、代码里建一份私有的含糊清单。按爆炸半径排序：
 
-1. **Architecture** — answers that change structure, dependencies, or data flow
-2. **Data model** — schemas, types, persistence, migrations
-3. **Behavior & UX flows** — edge case policy, error handling
-4. **Surface polish** — naming, copy, layout
+1. **架构**——答案会改变结构、依赖或数据流的
+2. **数据模型**——schema、类型、持久化、迁移
+3. **行为与 UX 流程**——边缘情况策略、错误处理
+4. **表面打磨**——命名、文案、布局
 
-Discard questions the territory already answers. Never ask what you can look up. Facts
-you *can't* look up (unreachable systems, what a teammate actually observed) are fair
-material — flag them as verification, not decisions, and prefer asking for command
-output over recollection.
+领地已经回答了的问题丢掉。绝不问你能自己查到的。你*查不到*的事实（够不到的
+系统、同事实际观察到的现象）是正当材料——标注为验证而非决策，并且偏好要命令
+输出而不是要回忆。
 
-## 2. Interview
+## 2. 采访
 
-- **Say how long the tunnel is.** Open with the expected count ("about six questions,
-  biggest first") and update it if answers change the list — an interview with no
-  visible end feels like ceremony, and gets abandoned.
-- **One question per turn.** Never dump a list.
-- Each question carries: the question, **why it matters** (one sentence), and **a
-  suggested default** so the user can just reply "default".
-- Follow the thread: if an answer opens a bigger ambiguity, pursue it first.
-- Pivot signal: if an answer implies the problem should be solved differently
-  altogether, stop and say so.
+- **说出隧道有多长。**开头报预计题数（"大约六个问题，最大的先来"），答案改变
+  清单时更新它——看不到尽头的采访像仪式，会被放弃。
+- **一回合一个问题。**绝不倒一整列。
+- 每个问题带三样：问题本身、**为什么重要**（一句话）、**一个建议的默认**——
+  让用户可以只回"默认"。
+- 顺着线头走：一个答案揭开更大的含糊时，先追它。
+- 转向信号：一个答案暗示问题本身该换个解法时，停下来说出来。
 
-Stop when remaining questions would no longer change any decision — typically 5–9 — or
-when the user says stop. Don't pad; don't cut short.
+剩下的问题不再会改变任何决策时停——通常 5–9 个——或用户喊停时停。不凑数；
+不早收。
 
-## 3. Deliver the decision log
+## 3. 交付决策日志
 
-1. **Decision log** — table: question → decision → implication for implementation
-2. **Assumptions adopted** — defaults accepted without discussion, flagged for revisit
-3. **Still open** — anything deferred, with what it blocks
+1. **决策日志**——表格：问题 → 决策 → 对实现的影响
+2. **采纳的假设**——未经讨论接受的默认，标注待复核
+3. **仍开放**——推迟的一切，以及它挡住了什么
 
-Format for direct pasting into the plan.
+用能直接粘进计划的格式。
 
-## Guardrails
+## 护栏
 
-- Don't re-ask what the user already said — quote it back if you need confirmation.
-- If the user answers "I don't know" twice on the same topic, that topic needs
-  brainstorm, blindspot, or a diagnostic spike — whichever hasn't run yet — not more
-  pressure.
+- 用户已经说过的不要再问——需要确认就复述给他们听。
+- 用户在同一话题上第二次回答"不知道"时，这个话题需要的是头脑风暴、盲区扫描或
+  诊断试探——哪个还没跑用哪个——不是更大的追问压力。

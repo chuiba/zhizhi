@@ -1,45 +1,37 @@
-# Pitch & Explainer Doc
+# 说服与讲解文档（Pitch & Explainer Doc）
 
-Reviewers start with the same unknowns the user started with. A good pitch doc walks
-them through faster, and shows experts that the failure points they'd probe were already
-accounted for. Answer their first three questions before they ask.
+评审者带着用户当初同样的未知开局。一份好的说服文档带他们走得更快，并让专家
+看到：他们想戳的失败点已经被想到了。抢在他们开口之前回答前三个问题。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-the doc is written in its audience's language (match the repo's PR/doc convention). Code
-identifiers, file paths, and anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, PASS /
-NOT YET) stay in English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——文档用它的受众的
+语言写（匹配仓库的 PR/文档惯例）。代码标识符、文件路径与锚点词（CONFIRMED /
+FALSE / UNVERIFIABLE、PASS / NOT YET）保持英文。
 
-## One document, in this order
+## 一份文档，按此顺序
 
-1. **The demo** — GIF/screenshot/link, first thing visible. One caption line. For
-   non-visual work the demo is a terminal transcript or test run showing the
-   before/after behavior — same rule: visible first, one caption.
-2. **What & why** — two paragraphs max: the problem, and why now.
-3. **The decisions that matter** — the 2–4 choices a reviewer would push on, each with
-   the reasoning and the rejected alternative. Pull from the plan's "most likely to
-   tweak" section and the decision log. No plan or decision log? Derive the decisions
-   from the diff and write the reasoning as present-tense justification ("we use X
-   because…") — never as narrated history ("we considered Y and rejected it") unless
-   that consideration is actually on record.
-4. **Unknowns we found and answered** — potholes discovered along the way (from the
-   blindspot briefing and the notes' Deviations/Surprises) and how each was handled.
-   This is the section that converts experts: their anticipated objections, already met.
-5. **What we didn't do** — explicit non-goals and known limitations. Preempts the
-   "but what about…" thread.
-6. **How to try it** — exact commands or steps, copy-pasteable.
-7. **Risks & rollback** — what could go wrong and how to undo it.
+1. **演示**——GIF/截图/链接，第一眼可见。一行说明。非视觉工作的演示是显示
+   前后行为的终端记录或测试运行——同样的规则：第一眼可见，一行说明。
+2. **做了什么、为什么**——最多两段：问题是什么，为什么是现在。
+3. **要紧的决策**——评审者会追问的 2–4 个选择，各带理由和被否掉的替代方案。
+   从计划的"最可能微调"节和决策日志里取。没有计划或决策日志？从 diff 推导
+   决策，用现在时的论证写理由（"我们用 X 因为……"）——绝不写成叙述的历史
+   （"我们考虑过 Y 并否决了它"），除非那次考虑真的有记录。
+4. **发现并回答了的未知**——路上发现的坑（来自盲区简报和笔记的 Deviations/
+   Surprises）以及各自怎么处理的。这一节是让专家转向的：他们预备好的反对，
+   已经被接住了。
+5. **没做什么**——显式的非目标与已知局限。抢在"那……怎么办"这条线之前。
+6. **怎么试**——确切的命令或步骤，可以直接复制粘贴。
+7. **风险与回滚**——会出什么错、怎么撤销。
 
-## Fit the channel
+## 适配渠道
 
-Default: a single Markdown document that drops cleanly into Slack or a PR description.
-For a standalone page (design review, wider audience): one self-contained HTML file,
-same structure, demo media embedded.
+默认：一份能干净地放进 Slack 或 PR 描述的 Markdown 文档。独立页面（设计评审、
+更广的受众）：一个自包含 HTML 文件，同样的结构，演示媒体内嵌。
 
-## Quality bar
+## 质量线
 
-- A reviewer who reads only the demo and section 3 should already lean yes.
-- Every "it works" claim is backed by something visible: a test **run**, a screenshot,
-  a command output — a test's name is a claim, its output is evidence. When the wrapup
-  audit ran, cite the evidence behind its verdict rows, and let section 7 link the
-  audit's verdict table instead of restating it.
-- No section over ~150 words except the decisions section. Cut until it hurts, then stop.
+- 只读演示和第 3 节的评审者，就该已经倾向于同意。
+- 每条"它工作"的声明背后都有可见之物：一次测试**运行**、一张截图、一段命令
+  输出——测试的名字是声明，测试的输出才是证据。wrapup 审计跑过时，引用它判定
+  行背后的证据，让第 7 节链接审计的判定表而不是复述它。
+- 除决策节外，每节不超过约 150 字。删到疼，然后停。

@@ -43,6 +43,13 @@ def prose(rel: str) -> str:
     return re.sub(r"\s+", " ", read(rel))
 
 
+def has(rel: str, phrase: str) -> bool:
+    """Whitespace-insensitive containment — CJK line wraps insert no spaces,
+    so both needle and haystack are compared with all whitespace removed."""
+    squash = lambda s: re.sub(r"\s+", "", s)
+    return squash(phrase) in squash(read(rel))
+
+
 # ---------------------------------------------------------------- frontmatter
 
 SKILLS = ["kickoff", "wrapup", "quiz-me"]
@@ -103,24 +110,23 @@ ANCHOR_SETS = {
 
 for token, files in ANCHOR_SETS.items():
     for rel in files:
-        check(f"anchor '{token}' present in {rel}", token in prose(rel))
+        check(f"anchor '{token}' present in {rel}", has(rel, token))
 
 # The two-axis vocabulary must exist on both sides of the handoff.
-check("wrapup gate names the merge axis", "merge axis" in prose(WRAPUP))
-check("wrapup gate names the understanding axis", "understanding axis" in prose(WRAPUP))
-check("quiz-me scopes itself to one axis", "one axis" in prose(QUIZME))
+check("wrapup gate names the merge axis", has(WRAPUP, "合并轴"))
+check("wrapup gate names the understanding axis", has(WRAPUP, "理解轴"))
+check("quiz-me scopes itself to one axis", has(QUIZME, "一条轴"))
 check("quiz-me hands merge-worthiness to wrapup",
-      re.search(r"merge[\w-]*.{0,60}wrapup", prose(QUIZME), re.IGNORECASE) is not None,
+      re.search(r"(merge[\w-]*|合并).{0,60}wrapup", prose(QUIZME), re.IGNORECASE) is not None,
       "quiz-me must direct the merge question to wrapup's audit")
 
 # ------------------------------------------- five-item stop-and-ask base set
 # The permanent base lives in two places that must agree: plan.md section 3
 # (the contract the implementer works under) and the always-on rules.
 
-BASE_STEMS = ["intent", "value tradeoff", "irreversible", "security surface",
-              "outward promises"]
+BASE_STEMS = ["意图", "价值权衡", "不可逆", "安全面", "对外承诺"]
 for rel in (PLAN, RULES):
-    text = prose(rel).lower()
+    text = re.sub(r"\s+", "", read(rel)).lower()
     missing = [s for s in BASE_STEMS if s not in text]
     check(f"five stop-and-ask base items present in {rel}",
           not missing, f"missing stems: {missing}")
@@ -128,29 +134,29 @@ for rel in (PLAN, RULES):
 # ------------------------------------------------------- cross-skill handoff
 
 check("plan.md has a section 5 verification contract heading",
-      re.search(r"^### 5\..*[Vv]erification contract", read(PLAN), re.MULTILINE) is not None)
+      re.search(r"^### 5\..*([Vv]erification contract|验证契约)", read(PLAN), re.MULTILINE) is not None)
 check("plan.md has a section 3 deviation policy heading",
-      re.search(r"^### 3\..*[Dd]eviation policy", read(PLAN), re.MULTILINE) is not None)
+      re.search(r"^### 3\..*([Dd]eviation policy|偏差策略)", read(PLAN), re.MULTILINE) is not None)
 check("plan.md commits pass bars before results exist",
-      "committed now" in prose(PLAN).lower())
+      has(PLAN, "现在就承诺"))
 check("plan.md separates author from verdict",
-      "never the author of its verdict" in prose(PLAN))
+      has(PLAN, "不是其判定的作者"))
 check("audit.md forbids fabricating criteria after the fact",
-      "never fabricate acceptance criteria" in prose(AUDIT))
+      has(AUDIT, "编造验收标准"))
 check("audit.md orders evidence before narrative",
-      re.search(r"narrative.{0,80}last", prose(AUDIT), re.IGNORECASE) is not None)
+      re.search(r"(narrative.{0,80}last|叙事.{0,40}最后)", prose(AUDIT), re.IGNORECASE) is not None)
 check("wrapup audits before narrating",
-      "Audit before you narrate" in prose(WRAPUP))
+      has(WRAPUP, "先审计，后叙事"))
 check("wrapup reads audit.md for the audit",
       "references/audit.md" in read(WRAPUP))
 check("kickoff plan embeds the verification contract for wrapup",
-      "verification contract" in prose("skills/kickoff/SKILL.md"))
+      "verification contract" in prose("skills/kickoff/SKILL.md").lower())
 check("wrapup two-axis gate refuses to collapse the axes",
-      "Never collapse the axes" in prose(WRAPUP))
+      has(WRAPUP, "绝不把两条轴折叠"))
 check("quiz-me PASS verdict promises understanding, not merge",
-      "PASS — you understand this change" in prose(QUIZME))
+      has(QUIZME, "PASS — 你理解这次改动"))
 check("wrapup understanding axis uses the same PASS phrasing as quiz-me",
-      "PASS — you understand this change" in prose(WRAPUP))
+      has(WRAPUP, "PASS — 你理解这次改动"))
 
 # --------------------------------------------------------- language contract
 # Every user-facing skill file carries a Language spec so translated output

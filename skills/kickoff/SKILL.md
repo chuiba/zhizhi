@@ -1,96 +1,84 @@
 ---
 name: kickoff
-description: Kickoff (开工) — run before starting any non-trivial task. Diagnoses the gap between what the user asked for (the map) and what the codebase or domain actually requires (the territory), then applies only the techniques needed — blindspot briefing for unfamiliar territory, premise challenges that falsify what's treated as fact, throwaway prototypes and feasibility spikes for "I'll know it when I see it", one-question-at-a-time interviews for ambiguities, reference extraction, and an unknowns-first plan. Use when the user says "kickoff", "开工", "帮我开始", "找找我的盲区", "help me start", "find my unknowns", "what am I missing", "I don't know where to start", or when a previous attempt — theirs or an AI's — came back wrong and they don't know why.
+description: Kickoff（开工）——任何非平凡任务动手前先跑这一步。诊断用户请求（地图）与代码库或领域实际（领地）之间的落差，然后只运行需要的技术——陌生领地的盲区简报、证伪"被当作事实"之物的前提挑战、"见了才知道"的一次性原型与可行性试探、一次一问的采访、参考物语义提取、unknowns-first 计划。当用户说 "kickoff"、"开工"、"帮我开始"、"找找我的盲区"、"help me start"、"find my unknowns"、"what am I missing"、"我不知道从哪开始"，或上一次尝试——他们自己的或 AI 的——出了错却不知道为什么时使用。
 ---
 
-# Kickoff
+# Kickoff（开工）
 
-The user's request is the map. The codebase and the real world are the territory. The
-difference between them is the user's **unknowns** — and when you hit one mid-task, you
-guess. This skill spends a little time up front so you guess less later.
+用户的请求是地图，代码库和真实世界是领地。两者之间的差就是用户的**未知**——
+任务中途撞上一个未知时，你只能猜。这个 skill 在开工前花一点时间，让你之后少猜。
 
-**The deliverable is clarity, not code.** Kickoff never implements.
+**交付物是清晰，不是代码。**Kickoff 从不实现。
 
-**Language:** write everything user-facing — briefings, questions, prototypes' copy,
-plans — in the language the user is speaking. File names and code identifiers stay in
-English.
+**Language:** 用户看到的一切——简报、提问、原型文案、计划——用用户正在说的语言
+书写。文件名与代码标识符保持英文。
 
-## Step 1 — Diagnose (quietly)
+## 第 1 步——诊断（静默进行）
 
-Read the request, glance at the relevant territory (code, docs, history, and
-working-tree state — uncommitted changes are territory too), and score the signals
-below. Assess silently — don't lecture the framework; the diagnosis surfaces as one
-line at the top of Step 2:
+读请求，扫一眼相关领地（代码、文档、历史、工作区状态——未提交的改动也是领地），
+对照下表打分。诊断静默完成——不要宣讲框架；诊断结果以一行的形式出现在第 2 步
+开头：
 
-| Signal | Evidence |
+| 信号 | 证据 |
 |---|---|
-| **Unfamiliar territory** | New domain or untouched part of the codebase; user says "I've never…" / "I don't know X" |
-| **Confident assertions** | Statements about the territory phrased as certainty — "it's stored in X", "nothing else calls this" — especially about code nobody has touched recently |
-| **Failed prior attempts** | Reverted commits, abandoned branches, "we tried it and it broke", "the last attempt came back wrong and I don't know why" |
-| **Taste-driven criteria** | Vague quality words — "clean", "modern", "feels right" — user will know it when they see it |
-| **Feasibility in doubt** | Nobody knows if the approach is physically possible, accurate enough, or fast enough |
-| **Open decisions** | Ambiguities where different answers produce different architectures |
-| **A reference exists** | User points at (or you find) code, a library, or a site that already does it |
+| **陌生领地** | 新领域或代码库没碰过的部分；用户说"我从没……"/"我不懂 X" |
+| **自信断言** | 对领地以确定语气给出的陈述——"存在 X 里"、"没有别的地方调用它"——尤其是关于最近没人碰过的代码 |
+| **先前的失败尝试** | 回滚的提交、废弃的分支、"我们试过，结果坏了"、"上次改完不对，我不知道为什么" |
+| **品味驱动的标准** | 模糊的质量词——"干净"、"现代"、"感觉对"——用户见了才知道 |
+| **可行性存疑** | 没人知道这个方案是否物理上可行、精度够不够、速度够不够 |
+| **未定决策** | 不同答案会导向不同架构的含糊处 |
+| **存在参考物** | 用户指着（或你发现）已经实现了这件事的代码、库或网站 |
 
-Also collect the user's starting point if not stated — their experience with this
-problem and codebase, and where they are in their thinking — but ask only if the answer
-could change what fires; otherwise infer it from context. One short question at most;
-uncommitted local changes always earn it (are they intended state?).
+如果用户没说，还要收集他们的起点——对这个问题和这个代码库的经验，以及思考进行
+到哪一步——但只有当答案会改变哪些技术触发时才问；否则从上下文推断。至多一个
+简短问题；未提交的本地改动永远值得这一问（它们是有意的状态吗？）。
 
-## Step 2 — Run only what fires
+## 第 2 步——只运行触发了的
 
-**Open with the diagnosis in one line** — name the signals that fired, the techniques
-you'll run, and the rough cost: "Two signals fired: unfamiliar territory, open
-decisions — blind spot pass on src/auth first, then a ~5-question interview." The user
-can veto or reorder before anything runs; they should never wonder why they're being
-asked things. When three or more techniques fire, quote the cost as total expected user
-turns and offer a lite path (premise challenge + interview + plan); fold questions into
-other techniques' reaction rounds rather than stacking full loops.
+**开头用一行说出诊断**——点名触发的信号、要运行的技术、大致成本："两个信号
+触发：陌生领地、未定决策——先对 src/auth 做盲区扫描，然后约 5 个问题的采访。"
+用户可以在任何东西运行之前否决或调序；绝不该让他们纳闷为什么被问这些。三个及
+以上技术触发时，把成本按预计的用户回合总数报出来，并提供精简路径（前提挑战 +
+采访 + 计划）；把问题折进其他技术的反应回合，而不是叠满一套套完整循环。
 
-For each technique you run, **read its reference file first** and follow it:
+对每个要运行的技术，**先读它的 reference 文件**再照做：
 
-| Fires when | Technique | Read |
+| 触发条件 | 技术 | 读 |
 |---|---|---|
-| Unfamiliar territory | Blind spot pass — brief them on the questions they didn't know to ask | `references/blindspot.md` |
-| Confident assertions | Premise challenge — verify what's treated as fact against the territory, before building on it | `references/challenge.md` |
-| Failed prior attempts | The wreckage is territory — blind spot pass over the failed diffs, premise challenge on the failure's framing ("it's flaky", "it broke X") | `references/blindspot.md`, `references/challenge.md` |
-| Taste-driven criteria; feasibility or cause in doubt; an open decision whose option space is unexplored | Brainstorm, throwaway prototypes, or a feasibility/diagnostic spike — turn reactions and measurements into explicit criteria | `references/brainstorm.md` |
-| A reference exists | Extract its semantics into a keep/adapt/drop checklist | `references/use-reference.md` |
-| Open decisions remain | Interview — one question at a time, biggest blast radius first | `references/interview.md` |
+| 陌生领地 | 盲区扫描——把他们不知道要问的问题讲给他们 | `references/blindspot.md` |
+| 自信断言 | 前提挑战——在动工之前，把被当作事实的东西对照领地验证 | `references/challenge.md` |
+| 先前的失败尝试 | 残骸也是领地——对失败的 diff 做盲区扫描，对失败叙事的框架（"它不稳定"、"它搞坏了 X"）做前提挑战 | `references/blindspot.md`、`references/challenge.md` |
+| 品味驱动的标准；可行性或病因存疑；选项空间未探索的未定决策 | 头脑风暴、一次性原型、或可行性/诊断试探——把反应和测量变成显式标准 | `references/brainstorm.md` |
+| 存在参考物 | 把它的语义提取成 keep/adapt/drop 清单 | `references/use-reference.md` |
+| 仍有未定决策 | 采访——一次一问，爆炸半径最大的先问 | `references/interview.md` |
 
-The listed order is a default — reorder when one technique's output is another's input:
-a reference's checklist feeds the brainstorm, and a premise that could invalidate the
-framing gets challenged before anything else. Run **only the ones that fired** — kickoff
-is a diagnosis, not a ceremony. Between techniques, keep the user in the loop with one-line status
-("territory is clear, but three decisions could flip the architecture — interviewing you
-next").
+列出的顺序只是默认——当一个技术的输出是另一个的输入时就调整：参考物的清单喂给
+头脑风暴，可能推翻整个问题框架的前提最先挑战。**只运行触发了的**——kickoff 是
+诊断，不是仪式。技术之间用一行状态让用户跟上（"领地清楚了，但有三个决策可能
+翻转架构——接下来采访你"）。
 
-If nothing fires: say plainly "no meaningful unknowns here — just implement", and offer
-to start right away — once nothing fires, kickoff is over and normal work continues in
-this same session. That answer is kickoff succeeding, not failing.
+什么都没触发：直说"这里没有值得处理的未知——直接实现吧"，并主动提出立刻开工
+——一旦什么都没触发，kickoff 就结束了，正常工作在同一个会话里继续。这个回答是
+kickoff 成功，不是失败。
 
-## Step 3 — Always land on a handoff
+## 第 3 步——永远落在交接物上
 
-Every kickoff that ran at least one technique lands on an artifact — the nothing-fired
-exit needs none; "just implement" *is* its handoff:
+凡是运行了至少一个技术的 kickoff，都落在一个工件上——什么都没触发的出口不需要
+工件；"直接实现"本身就是它的交接：
 
-- **An unknowns-first plan** (read `references/plan.md`) if the user is heading into
-  implementation. The plan embeds a deviation policy, ends in a verification contract
-  whose pass bars the user approves in the same single review pass — locked before any
-  implementation exists, executed by wrapup's audit after — and instructs the
-  implementer to keep implementation notes (read `references/impl-notes.md` and fold
-  its setup into the plan's handoff section).
-- **A rewritten prompt** if the user just wanted clarity — their original request with
-  resolved assumptions inlined and remaining open questions flagged, ready to paste into
-  a fresh session.
-- **The requested document itself**, when the deliverable is a plan or doc (a migration
-  runbook, a design doc) — the unknowns-first plan is its skeleton, and writing it is
-  not "implementing". Adapt the section vocabulary to the domain and hand off to
-  whoever actually executes (see plan.md's handoff).
+- **unknowns-first 计划**（读 `references/plan.md`），如果用户即将进入实现。计划
+  内嵌偏差策略，以验证契约（verification contract）收尾——契约的通过线由用户在
+  同一轮审阅中批准，在任何实现存在之前锁定，完工后由 wrapup 的审计执行——并指示
+  实现者维护实现笔记（读 `references/impl-notes.md`，把它的设置折进计划的交接节）。
+- **一份重写的提示词**，如果用户只是想要清晰——他们的原始请求，把已解决的假设
+  内联进去，把仍开放的问题标出来，可以直接粘进新会话。
+- **所要的文档本身**，当交付物就是计划或文档时（迁移手册、设计文档）——
+  unknowns-first 计划是它的骨架，写它不算"实现"。把小节词汇适配到领域，交接给
+  真正执行的人（见 plan.md 的交接节）。
 
-## Guardrails
+## 护栏
 
-- One technique at a time; each technique's output feeds the next.
-- If diagnosis reveals the problem should be solved a different way altogether, say so
-  before anything else — that's the most valuable outcome a kickoff can have.
-- Simple task, familiar territory, clear spec → don't invent process. Say so and stop.
+- 一次一个技术；每个技术的输出喂给下一个。
+- 如果诊断显示这个问题根本应该换一种解法，先说这个再做别的——那是一次 kickoff
+  能有的最有价值的结果。
+- 任务简单、领地熟悉、规格清楚 → 不要发明流程。直说，然后停。

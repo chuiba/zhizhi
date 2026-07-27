@@ -1,70 +1,58 @@
-# Brainstorm & Throwaway Prototypes
+# 头脑风暴与一次性原型（Brainstorm & Throwaway Prototypes）
 
-This technique hunts criteria the user only knows to define when they see them. Finding
-them during prototyping is cheap; finding them mid-implementation is expensive — small
-spec changes cause drastically different implementations. Make cheap concrete things,
-let the user react, turn reactions into explicit criteria.
+这个技术猎的是用户只有见到才能定义的标准。在原型阶段发现它们便宜；在实现中途
+发现它们昂贵——规格的小改动会导致截然不同的实现。做便宜的具体东西，让用户
+反应，把反应变成显式标准。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (CONFIRMED / FALSE / UNVERIFIABLE, PASS / NOT YET, notes headings) stay in
-English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（CONFIRMED / FALSE / UNVERIFIABLE、
+PASS / NOT YET、笔记标题）保持英文。
 
-## Mode A — Approach brainstorm (strategy, architecture, product)
+## 模式 A——方案风暴（策略、架构、产品）
 
-1. Restate the problem in one paragraph; list known constraints.
-2. Search the codebase and/or web for context that changes the option space.
-3. Generate **5–10 distinct approaches, ordered cheapest to most ambitious.** Each gets:
-   one-line description, core tradeoff, rough cost (hours / days / week+). Include at
-   least one approach that reframes the problem instead of solving it as posed.
-4. Ask which ones resonate. Don't pick for the user — the reactions are the point.
+1. 用一段话重述问题；列出已知约束。
+2. 搜代码库和/或网络，找会改变选项空间的上下文。
+3. 生成 **5–10 个彼此不同的方案，从最便宜到最有野心排列。**每个带：一行描述、
+   核心权衡、粗略成本（小时 / 天 / 一周以上）。至少包含一个重新定义问题而不是
+   按原样求解的方案。
+4. 问哪些引起共鸣。不要替用户挑——反应本身才是重点。
 
-## Mode B — Prototype (visual, UX, anything "I'll know it when I see it")
+## 模式 B——原型（视觉、UX、一切"见了才知道"）
 
-1. Build **3–4 wildly different directions**, not four variations of one idea. If they'd
-   all get the same one-word label ("minimal"), they're not different enough.
-2. Each is a **single self-contained HTML file with fake data in the user's language** —
-   taste reactions to English placeholder text don't transfer, especially typography and
-   density. No backend, no build step, no wiring into the real app.
-3. Write prototypes somewhere the user can actually open and that outlives the turn —
-   never the project source tree. On a remote or sandboxed host, a gitignored
-   `prototypes/` folder in the repo, with the exact paths to open in a browser.
-4. Present side by side (a simple index page linking them works well); ask what draws
-   the eye, what feels wrong, what's missing.
+1. 做 **3–4 个大相径庭的方向**，不是一个想法的四个变体。如果它们会得到同一个
+   一词标签（"极简"），就还不够不同。
+2. 每个是**单个自包含 HTML 文件，假数据用用户的语言**——对英文占位文本的品味
+   反应无法迁移，排版和密度尤甚。无后端、无构建步骤、不接进真实应用。
+3. 原型写在用户真能打开、且比这个回合活得久的地方——绝不放进项目源码树。远程
+   或沙箱宿主上，用仓库里 gitignore 的 `prototypes/` 目录，附上浏览器打开的
+   确切路径。
+4. 并排呈现（一个简单的索引页把它们链起来就很好）；问什么吸引眼球、什么感觉
+   不对、缺了什么。
 
-## Mode C — Feasibility spike ("can this be done at all — or why does it keep failing?")
+## 模式 C——可行性试探（"这到底做不做得成——或者它为什么总失败？"）
 
-Distinct from Mode B: taste prototypes ask *what should it look like*; spikes ask *is
-this physically possible, accurate enough, fast enough* — or, for diagnostic work,
-*which hypothesis about the failure survives an experiment*. Don't conflate them — a
-beautiful mockup of an approach that can't work is worse than no mockup.
+与模式 B 不同：品味原型问*它该长什么样*；试探问*这物理上可行吗、精度够吗、
+速度够吗*——诊断类工作则问*关于故障的哪个假设能活过一次实验*。别混淆——一个
+做不成的方案的漂亮 mockup，比没有 mockup 更糟。
 
-1. **Define the pass/fail threshold before running the spike** ("transcription must
-   place word boundaries within ±50ms on our sample audio"). Deciding the bar after
-   seeing results invites rationalizing. If the threshold is itself an undecided
-   question ("how fast is fast enough?"), ask that single interview question early,
-   out of order, before running the spike.
-2. Build the smallest experiment that produces a yes/no answer with evidence — a script
-   against real sample data beats a toy demo. If the spike needs an environment you
-   can't reach, deliver a runnable script plus the pre-committed bar for the user to
-   execute and report.
-3. Output: **verdict + measured evidence + implications for the approach.** A failed
-   spike is the technique succeeding — it just saved the expensive version of the same
-   discovery.
+1. **跑试探之前先定通过/不通过的线**（"转写必须在我们的样本音频上把词边界定位
+   在 ±50ms 内"）。看了结果再定线会招来合理化。如果线本身就是个未定问题（"多快
+   算够快？"），把这一个采访问题提早、乱序地问掉，再跑试探。
+2. 做能给出是/否答案并带证据的最小实验——一个跑真实样本数据的脚本胜过玩具
+   demo。试探需要你够不到的环境时，交付可运行脚本加预先承诺的线，让用户执行
+   并回报。
+3. 输出：**判定 + 测得的证据 + 对方案的影响。**失败的试探是这个技术在成功——
+   它刚刚省掉了同一发现的昂贵版本。
 
-## The reaction loop (all modes)
+## 反应循环（所有模式）
 
-After each round, update a visible list called **Criteria discovered** — every reaction
-translated into an explicit, testable criterion ("dense tables over cards", "one primary
-action per screen"). Default to two reaction rounds; ask before a third.
+每轮之后，更新一个可见的清单，叫**已发现的标准**——每个反应翻译成一条显式、
+可测试的标准（"密表格胜过卡片"、"每屏一个主操作"）。默认两轮反应；第三轮先问。
 
-**The criteria list is the real deliverable, not the prototypes.** Output it in a form
-that pastes into the plan.
+**标准清单才是真交付物，不是原型。**用能直接粘进计划的形式输出它。
 
-## Guardrails
+## 护栏
 
-- Prototypes are disposable. Never promote prototype code into the real app; the real
-  implementation starts from the criteria.
-- Don't polish prototypes.
-- If a new reaction contradicts an earlier criterion, surface the contradiction instead
-  of silently obeying the newest instruction.
+- 原型是用完即弃的。绝不把原型代码提拔进真实应用；真实实现从标准出发。
+- 不要打磨原型。
+- 新反应与先前的标准矛盾时，把矛盾亮出来，而不是默默服从最新指令。

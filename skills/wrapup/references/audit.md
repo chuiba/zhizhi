@@ -1,107 +1,92 @@
-# Verification Audit
+# 验证审计（Verification Audit）
 
-At kickoff, the user's request was the map and the codebase the territory. Now the
-implementation's story — the plan's promises, the notes, this session's own memory —
-is the map, and **the diff plus the running system are the territory**. Same rule as
-the premise challenge, pointed the other way: verify against the territory, never by
-re-asking the author. Including when the author is you.
+Kickoff 时，用户的请求是地图，代码库是领地。现在，实现讲的故事——计划的承诺、
+笔记、本会话自己的记忆——是地图，**diff 加上运行中的系统是领地**。和前提挑战
+同一条规则，只是调转了方向：对照领地验证，绝不通过再问作者验证。包括作者就是
+你自己的时候。
 
-**Language:** templates and section names in this file are the spec, not literal output —
-render everything user-facing in the user's language. Code identifiers, file paths, and
-anchor tokens (VERIFIED / FAILED / NOT RUN, DEFERRED, AMENDMENT PENDING, CONFIRMED /
-FALSE / UNVERIFIABLE, PASS / NOT YET, "(self-audited)") stay in English.
+**Language:** 本文件中的模板与小节名是规格，不是照抄的输出——用户看到的一切用
+用户的语言呈现。代码标识符、文件路径与锚点词（VERIFIED / FAILED / NOT RUN、
+DEFERRED、AMENDMENT PENDING、CONFIRMED / FALSE / UNVERIFIABLE、PASS / NOT YET、
+"(self-audited)"）保持英文。
 
-## 0. Read in this order
+## 0. 按这个顺序读
 
-Both contract copies (plan §5 and the top of `implementation-notes.md`), then the diff,
-then the recorded evidence — the narrative (notes prose, session memory) **last**. In a
-fresh session this is simply the order the inputs load, and it is why the audit prefers
-one: an implementing session cannot unread its own rationalizations. Divergence between
-the two contract copies without a matching Amendments entry is itself a finding.
+两份契约副本（计划 §5 和 `implementation-notes.md` 顶部），然后 diff，然后已
+记录的证据——叙事（笔记散文、会话记忆）**最后**读。在新会话里这就是输入加载
+的自然顺序，也是审计偏好新会话的原因：实现它的会话没法取消阅读自己的合理化。
+两份契约副本有分歧却没有对应的 Amendments 记录，本身就是一个发现。
 
-## 1. Re-run the contract
+## 1. 重跑契约
 
-One row per §5 line: verdict + evidence.
+§5 每行一条记录：判定 + 证据。
 
-- **Runnable checks: re-execute, don't trust logs.** Re-running a listed command is
-  cheaper than deciding whether to believe a transcript. Judge the output against the
-  line's pre-committed bar → **VERIFIED / FAILED / NOT RUN**.
-- **Inspection checks:** verify the criterion where the line says to look; cite what
-  you saw.
-- **Structurally can't run before merge** (ops executes it at cutover): mark
-  `DEFERRED — runner: <name>, due: <moment>`. The human gate then signs the
-  *checklist's completeness*, not results that don't exist yet.
-- **Amended lines:** judge against the stricter reading and mark AMENDMENT PENDING for
-  the human's countersign — never FAILED for the crime of being amended.
-- **Host can't execute anything:** hand the user each line's exact command and bar;
-  pasted output is territory evidence (the premise challenge's protocol). Lines nobody
-  ran are `DEFERRED — runner: you`.
+- **可运行的检查：重新执行，不要相信日志。**重跑一条列明的命令，比决定要不要
+  相信一份转录便宜。用该行预先承诺的通过线判定输出 → **VERIFIED / FAILED /
+  NOT RUN**。
+- **检视类检查：**去该行指定的地方验证判据；引用你看到了什么。
+- **结构上合并前跑不了的**（运维在切换时执行）：标
+  `DEFERRED — runner: <名字>, due: <时刻>`。人类闸门此时签的是*清单的完备性*，
+  不是尚不存在的结果。
+- **被修正的行：**按两种读法中更严的判定，并标 AMENDMENT PENDING 等人类会签——
+  绝不因为被修正过就判 FAILED。
+- **宿主什么都执行不了：**把每行的确切命令和通过线交给用户，贴回来的输出就是
+  领地证据（前提挑战的协议）。没人跑的行标 `DEFERRED — runner: you`。
 
-## 2. Reconstruct the deviations
+## 2. 重构偏差集
 
-Walk the diff against the plan and rebuild the true deviation set — *then* reconcile it
-with the notes. An undocumented deviation is detected, not confessed: it is the
-implementer's own not-knowing-what-it-doesn't-know, and this pass is the only place it
-surfaces.
+拿着 diff 对照计划走一遍，重建真实的偏差集——*然后*才与笔记核对。未记录的
+偏差是被侦测出来的，不是被坦白出来的：它是实现者自己的不知己所不知，而这一遍
+是它唯一浮出水面的地方。
 
-- **Materiality filter:** a divergence counts as a finding only if it touches §1
-  decisions, §2 assumptions, §3's stop-and-ask base, or §5 contract lines.
-  Mechanical-section divergence gets one summary line, unitemized — a reconciliation
-  table that is 90% plumbing noise trains the reader to skip the row that matters.
-- **Consequences:** material and unreported → the merge tally cannot read all-green;
-  the item gets its own verdict-table row with a one-line risk read; and it feeds
-  wrapup's barrier retro (which guard should have caught it — the notes discipline?
-  a contract line never written?). Immaterial → one line, no drama.
+- **实质性过滤：**只有触及 §1 决策、§2 假设、§3 停下来问底座、或 §5 契约行的
+  分歧才算发现。机械节的分歧给一行汇总，不逐项——一张九成是管线噪音的核对表，
+  训练的是读者跳过真正要命的那一行。
+- **后果：**实质且未上报 → 合并计数不得读作全绿；该项在判定表里占一行，附一行
+  风险判断；并喂给 wrapup 的屏障复盘（哪道防线本该拦住它——笔记纪律？一条没
+  写的契约行？）。非实质 → 一行带过，不摆戏剧。
 
-## 3. Grade the story's claims
+## 3. 给故事的声明打分
 
-Every assertion in the notes' summary and prose of the form "works", "handled",
-"nothing else calls this" is a premise about the territory. Verdict each one whose
-falsity would change the merge decision: **CONFIRMED** (evidence cited) / **FALSE** /
-**UNVERIFIABLE** — the standard kickoff applies to the user's beliefs (evidence, not
-vibes), finally applied to the implementer's. The default that makes tags unnecessary:
-**all narrative is uncorroborated until this step corroborates it** — a default cannot
-be gamed by silence. Narrative is welcome; it gets reconciled, not punished.
+笔记摘要和散文里每条"works"、"handled"、"没有别的地方调用它"形态的断言，都是
+一个关于领地的前提。凡其不实会改变合并决策的，逐条判定：**CONFIRMED**（引证
+据）/ **FALSE** / **UNVERIFIABLE**——kickoff 用在用户信念上的标准（证据，不是
+感觉），终于用到实现者身上。让标签变得不必要的默认值：**所有叙事在本步佐证
+之前都是未佐证的**——默认值无法靠沉默博弈。叙事是受欢迎的；它被核对，不被
+惩罚。
 
-## No contract? (the common path)
+## 没有契约？（常见路径）
 
-When no plan §5 exists — kickoff never ran, or the plan predates contracts — say so
-plainly and **never fabricate acceptance criteria after seeing the results, then
-"verify" them**: that is the single-author problem wearing the audit's vocabulary.
-Downgrade honestly: run passes 2–3, build the spot-check menu, and stamp the merge line
-`NO CONTRACT — verified by inspection`, closing with one line: "pre-committed contracts
-next time → run kickoff first."
+计划 §5 不存在时——kickoff 没跑过，或计划早于契约机制——就直说，并且**绝不在
+看到结果之后编造验收标准、再去"验证"它们**：那是单作者问题穿上了审计的词汇。
+诚实降级：跑第 2、3 遍，建抽查菜单，合并行盖
+`NO CONTRACT — verified by inspection`，收尾一句："下次要预先承诺的契约 →
+先跑 kickoff。"
 
-## Self-audit (the most common invocation)
+## 自审计（最常见的调用方式）
 
-Same session that implemented? The audit still runs, asymmetrically by evidence type:
+实现它的会话就是审计它的会话？审计照样跑，但按证据类型不对称处理：
 
-- Contract re-runs stay **strong evidence even self-run** — a command's raw output is
-  territory, reproducible by the reader from the verdict table. A self-audited merge
-  axis may read all-green **only when every contract row carries output the reader
-  could reproduce**; a row resting on the session's memory stays NOT RUN.
-- Passes 2–3 are narrative-vs-narrative and are **weak under self-audit** — the auditor
-  shares the author's blind spots. Say so in the verdict table.
-- Tag the verdict **"(self-audited)"** and name when a fresh-session audit is worth
-  demanding: any FAILED line, a material unreported deviation, or work touching the
-  stop-and-ask base.
+- 契约重跑**即使自己跑也是强证据**——命令的原始输出是领地，读者可以照判定表
+  复现。自审计的合并轴**只有当每一契约行都带着读者可复现的输出**时才可以读作
+  全绿；靠会话记忆撑着的行保持 NOT RUN。
+- 第 2、3 遍是叙事对叙事，**在自审计下是弱的**——审计者与作者共享盲区。在判定
+  表里写明这一点。
+- 给判定打上 **"(self-audited)"** 标签，并写明什么时候值得要求一次新会话审计：
+  任何 FAILED 行、实质性未上报偏差、或触及停下来问底座的工作。
 
-Where the host offers subagents or a second model, hand the audit to an independent
-instance — independence beats a disclosure tag.
+宿主提供子代理或第二个模型时，把审计交给独立实例——独立性胜过一个披露标签。
 
-## Write it down
+## 写下来
 
-The audit's product is a one-screen verdict table: contract rows with verdicts, the
-deviation reconciliation, graded claims, and the rollback path. Write findings to disk
-as you go (wrapup's write-to-files rule). The tally line **is** the merge axis:
+审计的产物是一屏判定表：带判定的契约行、偏差核对、打分后的声明、回滚路径。
+发现随手写进磁盘（wrapup 的写文件规则）。计数行**就是**合并轴：
 "contract: 4/6 VERIFIED, 1 DEFERRED, 1 FAILED — not mergeable yet."
 
-## Guardrails
+## 护栏
 
-- Depth scales with the contract, which scales with the plan's §1. A one-line contract
-  is a one-command audit.
-- A FAILED line or FALSE claim is the audit **succeeding** — it fired before the
-  reviewer or production did. Surface it, recommend fix-and-re-audit; don't proceed to
-  quiz a human on a change that doesn't work.
-- Honest exit: for a diff whose only claims are visible in the diff itself, "nothing to
-  audit beyond the contract re-run" is a valid outcome, not a failure.
+- 深度随契约伸缩，契约随计划 §1 伸缩。一行的契约就是一条命令的审计。
+- 一条 FAILED 行或一条 FALSE 声明是审计**成功**——它抢在评审者或生产环境之前
+  响了。亮出来，建议 fix-and-re-audit；不要接着拿一个不工作的改动去测验人。
+- 诚实出口：一个所有声明都在 diff 里可见的 diff，"除契约重跑外没有可审计的"
+  是有效结果，不是失败。
